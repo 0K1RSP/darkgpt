@@ -51,6 +51,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Générer
         </a>
+        <a href="#" data-tab="promos" onclick="switchTab('promos',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Codes Promo
+        </a>
+
         <a href="#" data-tab="logs" onclick="switchTab('logs',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Logs API
@@ -141,6 +146,45 @@
         </div>
       </div>
 
+      <!-- TAB: Promo Codes -->
+      <div id="tab-promos" class="tab-content" style="display:none;">
+        <div class="admin-header">
+          <h1>Codes Promo</h1>
+        </div>
+        <div class="admin-card" style="max-width:600px;margin-bottom:24px;">
+          <div class="admin-card-header"><h3>Créer un code promo</h3></div>
+          <div class="admin-card-body">
+            <div class="form-group">
+              <label>Code (ex: SUMMER2024)</label>
+              <input type="text" id="promo-code" placeholder="CODE123" style="text-transform:uppercase">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="form-group">
+                <label>Réduction (%)</label>
+                <input type="number" id="promo-discount" value="10" min="1" max="100">
+              </div>
+              <div class="form-group">
+                <label>Utilisations max (vide = illimité)</label>
+                <input type="number" id="promo-maxuses" placeholder="Illimité" min="1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Date d'expiration (optionnel)</label>
+              <input type="date" id="promo-expires">
+            </div>
+            <button class="btn btn-primary w-full" onclick="createPromo()">Créer le code promo</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header"><h3>Codes promo existants</h3></div>
+          <div class="admin-card-body" style="padding:0;overflow-x:auto;">
+            <table class="data-table"><thead><tr><th>Code</th><th>Réduction</th><th>Utilisé</th><th>Max</th><th>Status</th><th>Expire</th><th>Actions</th></tr></thead><tbody id="promos-table"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+
+
     </main>
   </div>
 
@@ -190,6 +234,7 @@
       if(tab==='licenses')loadLicenses();
       if(tab==='dashboard')loadStats();
       if(tab==='logs')loadLogs();
+      if(tab==='promos')loadPromos();
     }
 
     // ===== STATS =====
@@ -314,6 +359,54 @@
       const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
       c.appendChild(t);setTimeout(()=>t.remove(),3000);
     }
+
+    // ===== PROMO CODES =====
+    async function loadPromos(){
+      try{
+        const r=await fetch(API+'/api/admin/promos',{headers:{'Authorization':'Bearer '+token}});
+        const d=await r.json();
+        const tbody=document.getElementById('promos-table');
+        if(!d.promos.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Aucun code promo</td></tr>';return;}
+        tbody.innerHTML=d.promos.map(p=>`<tr>
+          <td style="font-weight:700;font-family:monospace;letter-spacing:1px;">${p.code}</td>
+          <td><span class="badge badge-lifetime">${p.discount_percent}%</span></td>
+          <td>${p.used_count}</td>
+          <td>${p.max_uses||'\u221e'}</td>
+          <td><span class="badge badge-${p.status}">${p.status}</span></td>
+          <td style="font-size:0.8rem">${p.expires_at?new Date(p.expires_at).toLocaleDateString('fr-FR'):'\u221e'}</td>
+          <td><div class="action-btns">
+            <button class="action-btn" title="${p.status==='active'?'D\u00e9sactiver':'Activer'}" onclick="togglePromo(${p.id})">${p.status==='active'?'\u23f8':'\u25b6'}</button>
+            <button class="action-btn danger" title="Supprimer" onclick="deletePromo(${p.id})">\ud83d\uddd1</button>
+          </div></td>
+        </tr>`).join('');
+      }catch(e){console.error(e);}
+    }
+
+    async function createPromo(){
+      const code=document.getElementById('promo-code').value;
+      const discount_percent=parseInt(document.getElementById('promo-discount').value)||10;
+      const max_uses=document.getElementById('promo-maxuses').value?parseInt(document.getElementById('promo-maxuses').value):null;
+      const expires_at=document.getElementById('promo-expires').value||null;
+      if(!code){toast('Entrez un code promo','error');return;}
+      try{
+        const r=await fetch(API+'/api/admin/promos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({code,discount_percent,max_uses,expires_at})});
+        const d=await r.json();
+        if(d.success){toast(`Code ${d.code} cr\u00e9\u00e9 (-${d.discount_percent}%)`,'success');document.getElementById('promo-code').value='';loadPromos();}
+        else toast(d.error||'Erreur','error');
+      }catch(e){toast('Erreur serveur','error');}
+    }
+
+    async function togglePromo(id){
+      await fetch(API+'/api/admin/promos/'+id+'/toggle',{method:'PATCH',headers:{'Authorization':'Bearer '+token}});
+      toast('Statut mis \u00e0 jour','success');loadPromos();
+    }
+    async function deletePromo(id){
+      if(!confirm('Supprimer ce code promo ?'))return;
+      await fetch(API+'/api/admin/promos/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+      toast('Code promo supprim\u00e9','success');loadPromos();
+    }
+
+
   </script>
 </body>
 </html>

@@ -167,9 +167,33 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS promo_codes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,
+    discount_percent INTEGER NOT NULL DEFAULT 10,
+    max_uses INTEGER DEFAULT NULL,
+    used_count INTEGER DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME DEFAULT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key_name TEXT NOT NULL,
+    api_key TEXT UNIQUE NOT NULL,
+    service TEXT NOT NULL DEFAULT 'custom',
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME DEFAULT NULL,
+    notes TEXT DEFAULT ''
+  );
+
   CREATE INDEX IF NOT EXISTS idx_licenses_key ON licenses(license_key);
   CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status);
   CREATE INDEX IF NOT EXISTS idx_logs_created ON api_logs(created_at);
+  CREATE INDEX IF NOT EXISTS idx_promo_code ON promo_codes(code);
+  CREATE INDEX IF NOT EXISTS idx_api_keys_status ON api_keys(status);
 `);
 
 // Create admin account
@@ -178,6 +202,20 @@ if (adminExists.count === 0) {
   const hashedPassword = bcrypt.hashSync(ADMIN_PASSWORD, 12);
   db.prepare('INSERT INTO admins (username, password) VALUES (?, ?)').run(ADMIN_USERNAME, hashedPassword);
   console.log(`Admin account created: ${ADMIN_USERNAME}`);
+}
+
+// Seed default API keys
+const apiKeysExist = db.prepare('SELECT COUNT(*) as count FROM api_keys').get();
+if (apiKeysExist.count === 0) {
+  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(
+    'OpenRouter IA', OPENROUTER_API_KEY, 'openrouter', 'Cl\u00e9 principale pour le chat IA'
+  );
+  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(
+    'Stripe Secret', STRIPE_SECRET_KEY, 'stripe', 'Cl\u00e9 secr\u00e8te Stripe'
+  );
+  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(
+    'Stripe Public', STRIPE_PUBLIC_KEY, 'stripe', 'Cl\u00e9 publique Stripe'
+  );
 }
 
 // ==================== HELPERS ====================
@@ -489,6 +527,96 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
   }
 });
 
+// ==================== PROMO CODES ROUTES ====================
+
+app.get('/api/admin/promos', adminAuth, (req, res) => {
+  const promos = db.prepare('SELECT * FROM promo_codes ORDER BY created_at DESC').all();
+  res.json({ promos });
+});
+
+app.post('/api/admin/promos', adminAuth, (req, res) => {
+  let { code, discount_percent, max_uses, expires_at } = req.body;
+  if (!code || typeof code !== 'string') return res.status(400).json({ error: 'Code requis' });
+  code = sanitizeInput(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length < 3 || code.length > 20) return res.status(400).json({ error: 'Code: 3-20 caract\u00e8res alphanum\u00e9riques' });
+  discount_percent = Math.max(1, Math.min(parseInt(discount_percent) || 10, 100));
+  max_uses = max_uses ? Math.max(1, parseInt(max_uses)) : null;
+  expires_at = expires_at || null;
+  try {
+    db.prepare('INSERT INTO promo_codes (code, discount_percent, max_uses, expires_at) VALUES (?, ?, ?, ?)').run(code, discount_percent, max_uses, expires_at);
+    res.json({ success: true, code, discount_percent });
+  } catch (e) {
+    res.status(400).json({ error: 'Ce code existe d\u00e9j\u00e0' });
+  }
+});
+
+app.patch('/api/admin/promos/:id/toggle', adminAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID invalide' });
+  const promo = db.prepare('SELECT status FROM promo_codes WHERE id = ?').get(id);
+  if (!promo) return res.status(404).json({ error: 'Code promo introuvable' });
+  const newStatus = promo.status === 'active' ? 'disabled' : 'active';
+  db.prepare('UPDATE promo_codes SET status = ? WHERE id = ?').run(newStatus, id);
+  res.json({ success: true, status: newStatus });
+});
+
+app.delete('/api/admin/promos/:id', adminAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID invalide' });
+  db.prepare('DELETE FROM promo_codes WHERE id = ?').run(id);
+  res.json({ success: true });
+});
+
+// Validate promo code (public)
+app.post('/api/promo/validate', (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.json({ valid: false });
+  const clean = sanitizeInput(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const promo = db.prepare('SELECT * FROM promo_codes WHERE code = ? AND status = ?').get(clean, 'active');
+  if (!promo) return res.json({ valid: false, error: 'Code invalide' });
+  if (promo.expires_at && new Date(promo.expires_at) < new Date()) return res.json({ valid: false, error: 'Code expir\u00e9' });
+  if (promo.max_uses && promo.used_count >= promo.max_uses) return res.json({ valid: false, error: 'Code \u00e9puis\u00e9' });
+  res.json({ valid: true, discount_percent: promo.discount_percent, code: promo.code });
+});
+
+// ==================== API KEYS MANAGEMENT ====================
+
+app.get('/api/admin/apikeys', adminAuth, (req, res) => {
+  const keys = db.prepare("SELECT id, key_name, SUBSTR(api_key, 1, 12) || '...' || SUBSTR(api_key, -6) as masked_key, api_key, service, status, created_at, last_used_at, notes FROM api_keys ORDER BY created_at DESC").all();
+  res.json({ keys });
+});
+
+app.post('/api/admin/apikeys', adminAuth, (req, res) => {
+  let { key_name, api_key, service, notes } = req.body;
+  if (!key_name || !api_key) return res.status(400).json({ error: 'Nom et cl\u00e9 requis' });
+  key_name = sanitizeInput(key_name);
+  service = sanitizeInput(service || 'custom');
+  notes = sanitizeInput(notes || '');
+  try {
+    db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(key_name, api_key, service, notes);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(400).json({ error: 'Cette cl\u00e9 existe d\u00e9j\u00e0' });
+  }
+});
+
+app.patch('/api/admin/apikeys/:id/toggle', adminAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID invalide' });
+  const key = db.prepare('SELECT status FROM api_keys WHERE id = ?').get(id);
+  if (!key) return res.status(404).json({ error: 'Cl\u00e9 introuvable' });
+  const newStatus = key.status === 'active' ? 'disabled' : 'active';
+  db.prepare('UPDATE api_keys SET status = ? WHERE id = ?').run(newStatus, id);
+  res.json({ success: true, status: newStatus });
+});
+
+app.delete('/api/admin/apikeys/:id', adminAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID invalide' });
+  db.prepare('DELETE FROM api_keys WHERE id = ?').run(id);
+  res.json({ success: true });
+});
+
 // ==================== STRIPE ROUTES ====================
 
 app.get('/api/stripe/key', (req, res) => {
@@ -496,7 +624,7 @@ app.get('/api/stripe/key', (req, res) => {
 });
 
 app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
-  const { plan } = req.body;
+  const { plan, promo_code } = req.body;
   const prices = {
     monthly: { amount: 1990, name: 'DarkGPT Mensuel' },
     lifetime: { amount: 4990, name: 'DarkGPT Lifetime' }
@@ -504,19 +632,33 @@ app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
   const p = prices[plan];
   if (!p) return res.status(400).json({ error: 'Plan invalide' });
 
+  let finalAmount = p.amount;
+  let promoApplied = null;
+
+  // Apply promo code if provided
+  if (promo_code) {
+    const clean = sanitizeInput(promo_code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const promo = db.prepare('SELECT * FROM promo_codes WHERE code = ? AND status = ?').get(clean, 'active');
+    if (promo && (!promo.expires_at || new Date(promo.expires_at) >= new Date()) && (!promo.max_uses || promo.used_count < promo.max_uses)) {
+      finalAmount = Math.round(p.amount * (1 - promo.discount_percent / 100));
+      promoApplied = clean;
+      db.prepare('UPDATE promo_codes SET used_count = used_count + 1 WHERE id = ?').run(promo.id);
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
           currency: 'eur',
-          product_data: { name: p.name },
-          unit_amount: p.amount
+          product_data: { name: promoApplied ? `${p.name} (-${promoApplied})` : p.name },
+          unit_amount: finalAmount
         },
         quantity: 1
       }],
       mode: 'payment',
-      metadata: { plan },
+      metadata: { plan, promo_code: promoApplied || '' },
       success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/buy`
     });
