@@ -43,7 +43,7 @@
             <li>Aucune censure</li>
             <li>Support prioritaire</li>
           </ul>
-          <button class="btn btn-secondary w-full" id="btn-monthly" onclick="checkout('monthly')">Sélectionner</button>
+          <button class="btn btn-secondary w-full" id="btn-monthly" onclick="openPaymentModal('monthly')">Sélectionner</button>
         </div>
         <div class="pricing-card featured" id="card-lifetime">
           <h3>Lifetime</h3>
@@ -55,7 +55,34 @@
             <li>Support VIP 24/7</li>
             <li>Accès anticipé nouveautés</li>
           </ul>
-          <button class="btn btn-primary w-full" id="btn-lifetime" onclick="checkout('lifetime')">Sélectionner</button>
+          <button class="btn btn-primary w-full" id="btn-lifetime" onclick="openPaymentModal('lifetime')">Sélectionner</button>
+        </div>
+      </div>
+
+      <!-- Payment Modal -->
+      <div id="payment-modal" style="display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); width: 100%; max-width: 400px; padding: 24px; position: relative;">
+          <button onclick="closePaymentModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+          <h3 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--text-primary);">Choisir un moyen de paiement</h3>
+          
+          <div id="payment-options" style="display: flex; flex-direction: column; gap: 12px;">
+            <button onclick="payStripe()" class="btn btn-primary" style="display: flex; justify-content: center; gap: 10px; background: #6366f1; border-color: #6366f1;">
+              💳 Carte Bancaire (Automatique)
+            </button>
+            <button onclick="showManualInstruction('paypal')" class="btn btn-secondary" style="display: flex; justify-content: center; gap: 10px;">
+              🅿️ PayPal (Manuel)
+            </button>
+            <button onclick="showManualInstruction('ltc')" class="btn btn-secondary" style="display: flex; justify-content: center; gap: 10px;">
+              🪙 Litecoin LTC (Manuel)
+            </button>
+          </div>
+
+          <div id="payment-instruction" style="display: none; margin-top: 10px; text-align: center;">
+            <p id="instruction-text" style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 16px; line-height: 1.5;"></p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Une fois le paiement effectué, veuillez ouvrir un ticket sur notre serveur Discord avec la preuve de paiement pour recevoir votre clé.</p>
+            <a href="https://discord.gg/9s2srGn6SR" target="_blank" class="btn btn-primary w-full" style="background: #5865F2; border-color: #5865F2;">Ouvrir un ticket Discord</a>
+            <button onclick="backToOptions()" class="btn btn-ghost w-full" style="margin-top: 8px; font-size: 0.85rem;">← Retour</button>
+          </div>
         </div>
       </div>
 
@@ -92,6 +119,49 @@
   <script nonce="__CSP_NONCE__">
     let activePromo = null;
     const basePrices = { monthly: 1500, lifetime: 5000 };
+    let selectedPlan = null;
+    let selectedPrice = 0;
+
+    function openPaymentModal(plan) {
+      selectedPlan = plan;
+      
+      // Calculate current price based on promo
+      let price = basePrices[plan] / 100;
+      if (activePromo) {
+        price = price * (1 - activePromo.discount / 100);
+      }
+      selectedPrice = price.toFixed(2);
+
+      document.getElementById('payment-modal').style.display = 'flex';
+      backToOptions(); // Reset view
+    }
+
+    function closePaymentModal() {
+      document.getElementById('payment-modal').style.display = 'none';
+    }
+
+    function backToOptions() {
+      document.getElementById('payment-options').style.display = 'flex';
+      document.getElementById('payment-instruction').style.display = 'none';
+    }
+
+    function showManualInstruction(method) {
+      document.getElementById('payment-options').style.display = 'none';
+      const instrEl = document.getElementById('instruction-text');
+      
+      if (method === 'paypal') {
+        instrEl.innerHTML = `Veuillez envoyer <strong>${selectedPrice}€</strong> sur le compte PayPal suivant (entre proches) :<br><br><strong style="user-select: all; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; display: inline-block;">j6209478@gmail.com</strong>`;
+      } else if (method === 'ltc') {
+        instrEl.innerHTML = `Veuillez envoyer l'équivalent de <strong>${selectedPrice}€</strong> sur l'adresse Litecoin (LTC) suivante :<br><br><strong style="user-select: all; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; display: inline-block; font-size: 0.8rem; word-break: break-all;">LVYjJY3BpettEEacSTLGH3bbBXP2RpFdkj</strong>`;
+      }
+      
+      document.getElementById('payment-instruction').style.display = 'block';
+    }
+
+    function payStripe() {
+      closePaymentModal();
+      checkout(selectedPlan);
+    }
 
     async function validatePromo() {
       const code = document.getElementById('promo-input').value.trim();
