@@ -209,7 +209,7 @@ if (adminExists.count === 0) {
 const apiKeysExist = db.prepare('SELECT COUNT(*) as count FROM api_keys').get();
 if (apiKeysExist.count === 0) {
   db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(
-    'OpenRouter IA', OPENROUTER_API_KEY, 'openrouter', 'Cl\u00e9 principale pour le chat IA'
+    'Groq IA', GROQ_API_KEY, 'groq', 'Cl\u00e9 principale pour le chat IA'
   );
   db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run(
     'Stripe Secret', STRIPE_SECRET_KEY, 'stripe', 'Cl\u00e9 secr\u00e8te Stripe'
