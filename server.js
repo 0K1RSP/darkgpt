@@ -469,10 +469,15 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
   }
 
   // Validate and sanitize messages
-  const cleanMessages = messages
+  let cleanMessages = messages
     .filter(m => m && typeof m.role === 'string' && typeof m.content === 'string')
     .filter(m => ['user', 'assistant'].includes(m.role))
     .map(m => ({ role: m.role, content: m.content.substring(0, 10000) }));
+
+  // Keep only the last 6 messages to stay well below the 6000 TPM limit of Groq's free tier
+  if (cleanMessages.length > 6) {
+    cleanMessages = cleanMessages.slice(-6);
+  }
 
   if (cleanMessages.length > 0) {
     const lastMsg = cleanMessages[cleanMessages.length - 1];
