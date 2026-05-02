@@ -68,6 +68,7 @@
       </div>
       <div class="chat-history" id="chat-history"></div>
       <div class="chat-sidebar-footer">
+        <button class="btn btn-ghost w-full btn-sm" onclick="clearHistory()" style="margin-bottom: 8px; font-size:0.8rem; color:var(--text-secondary); border: 1px solid var(--border-color);">🗑️ Vider l'historique</button>
         <a href="/" class="btn btn-ghost w-full btn-sm" style="font-size:0.8rem;">← Retour au site</a>
         <button class="btn btn-ghost w-full btn-sm" onclick="logoutUser()" style="color:var(--red-primary);font-size:0.8rem;">Déconnexion</button>
       </div>
@@ -124,6 +125,14 @@
       el.innerHTML = conversations.map((c, i) =>
         `<div class="chat-history-item ${currentConvo === i ? 'active' : ''}" onclick="loadConvo(${i})">${c.title || 'Conversation ' + (i+1)}</div>`
       ).join('');
+    }
+
+    function clearHistory() {
+      if(confirm('Êtes-vous sûr de vouloir supprimer tout l\'historique ?')) {
+        localStorage.removeItem('darkgpt_convos');
+        conversations = [];
+        newChat();
+      }
     }
 
     function newChat() {
