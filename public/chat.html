@@ -227,6 +227,7 @@
         });
 
         if (res.status === 401) { window.location.href = '/login'; return; }
+        if (!res.ok) { throw new Error('API Error'); }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
