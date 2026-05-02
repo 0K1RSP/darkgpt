@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 // ==================== SECURITY CONFIG ====================
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_51S4Oz6ERFgtddT0AxnvdYSnziThmLKXZXJwYPXJen3AxRj6fM0oF3wykhmY7UBCdh2r4OZF7DioEYSJTaLspbWNO00ikU0AdeU';
 const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY || 'pk_test_51S4Oz6ERFgtddT0AXyQ7UlrqR8pbdapLCl1qApNCD8k8kcqrurzO2ocUcDf6Gv3e1iLbE6tbs9QeX1n4OhUEaXFX00RAlRMJam';
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
@@ -452,7 +452,7 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
   if (cleanMessages.length === 0) return res.status(400).json({ error: 'Aucun message valide' });
 
   // Fixed model - not user-selectable
-  const selectedModel = 'deepseek/deepseek-r1:free';
+  const selectedModel = 'meta-llama/llama-3.3-70b-instruct:free';
 
   const systemPrompt = {
     role: 'system',
