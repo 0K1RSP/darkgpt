@@ -508,13 +508,18 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
 
-    const reader = response.body;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
     let buffer = '';
 
-    reader.on('data', (chunk) => {
-      buffer += chunk.toString();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
+
       for (const line of lines) {
         const trimmed = line.trim();
         if (trimmed.startsWith('data: ')) {
@@ -530,14 +535,10 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
           }
         }
       }
-    });
+    }
 
-    reader.on('end', () => {
-      res.write('data: [DONE]\n\n');
-      res.end();
-    });
-
-    reader.on('error', () => res.end());
+    res.write('data: [DONE]\n\n');
+    res.end();
 
     db.prepare('INSERT INTO api_logs (endpoint, license_key, ip_address, status) VALUES (?, ?, ?, ?)').run(
       '/api/chat', req.user.license_key, getClientIP(req), 'chat'
