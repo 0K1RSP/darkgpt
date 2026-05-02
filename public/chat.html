@@ -95,6 +95,9 @@
       </div>
 
       <div class="chat-input-area">
+        <div style="text-align: center; font-size: 0.8rem; color: var(--red-primary); margin-bottom: 8px;">
+          ⚠️ Veuillez patienter ~1 minute entre chaque message. Nous allons rectifier ce bug prochainement.
+        </div>
         <div class="chat-input-wrapper">
           <textarea class="chat-input" id="chat-input" placeholder="Posez votre question à DarkGPT..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
