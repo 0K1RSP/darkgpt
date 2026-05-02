@@ -4,10 +4,14 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const fs = require('fs');
 const Stripe = require('stripe');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
+
+// Secret admin path - change this to whatever you want
+const ADMIN_PATH = '/ctrl-x9k2m';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,22 +30,23 @@ const ADMIN_PASSWORD = 'ansarudev';
 
 // ==================== SECURITY MIDDLEWARE ====================
 
-// Helmet - Security headers
+// Helmet - Security headers (CSP handled manually with nonces)
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
-      scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.stripe.com"],
-      frameSrc: ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
-    }
-  },
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
 }));
+
+// Permissions-Policy - block unnecessary browser APIs
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self)');
+  next();
+});
+
+// Generate CSP nonce per request
+app.use((req, res, next) => {
+  req.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
 
 // CORS - Only allow same origin in production
 app.use(cors({
@@ -55,15 +60,15 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
-// Global rate limiter - 100 requests per minute per IP
+// Global rate limiter - 60 requests per minute per IP (ALL routes)
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 100,
+  max: 60,
   message: { error: 'Trop de requêtes. Réessayez dans une minute.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/', globalLimiter);
+app.use(globalLimiter);
 
 // Strict rate limiter for auth endpoints - 5 attempts per 15 min
 const authLimiter = rateLimit({
@@ -92,7 +97,32 @@ const stripeLimiter = rateLimit({
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   etag: true,
+  index: false,
 }));
+
+// Serve HTML with CSP nonce injection
+function serveHTML(file, opts = {}) {
+  return (req, res) => {
+    const nonce = req.nonce;
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+      "script-src-attr 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https:",
+      "connect-src 'self' https://api.stripe.com",
+      "frame-src 'self' https://js.stripe.com https://checkout.stripe.com"
+    ].join('; ');
+    res.setHeader('Content-Security-Policy', csp);
+    if (opts.noCache) res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    const filePath = path.join(__dirname, 'public', file);
+    fs.readFile(filePath, 'utf8', (err, html) => {
+      if (err) return res.status(500).send('Error');
+      res.type('html').send(html.replace(/__CSP_NONCE__/g, nonce));
+    });
+  };
+}
 
 // ==================== DATABASE ====================
 const db = new Database(path.join(__dirname, 'database.db'));
@@ -436,7 +466,7 @@ app.post('/api/chat', chatLimiter, userAuth, async (req, res) => {
               const parsed = JSON.parse(data);
               const content = parsed.choices?.[0]?.delta?.content || '';
               if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
-            } catch (e) {}
+            } catch (e) { }
           }
         }
       }
@@ -529,16 +559,19 @@ app.get('/api/stripe/success', async (req, res) => {
 
 // ==================== PAGE ROUTES ====================
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-app.get('/buy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'buy.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'public', 'chat.html')));
-app.get('/success', (req, res) => res.sendFile(path.join(__dirname, 'public', 'success.html')));
+app.get('/', serveHTML('index.html'));
+app.get('/login', serveHTML('login.html', { noCache: true }));
+app.get('/buy', serveHTML('buy.html'));
+app.get(ADMIN_PATH, serveHTML('admin.html', { noCache: true }));
+app.get('/chat', serveHTML('chat.html', { noCache: true }));
+app.get('/success', serveHTML('success.html', { noCache: true }));
+
+// Block direct /admin access
+app.get('/admin', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 app.get('/{path}', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.status(404).send('Not found');
 });
 
 // Global error handler
@@ -549,6 +582,6 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`\n🚀 DarkGPT Server: ${SITE_URL}`);
-  console.log(`📊 Admin Panel: ${SITE_URL}/admin`);
-  console.log(`🔒 Security: Helmet, Rate Limiting, Input Sanitization\n`);
+  console.log(`📊 Admin Panel: ${SITE_URL}${ADMIN_PATH}`);
+  console.log(`🔒 Security: CSP Nonces, Helmet, Rate Limiting, Permissions-Policy\n`);
 });
