@@ -59,6 +59,18 @@
         </div>
       </div>
 
+      <!-- Promo Code Section -->
+      <div class="text-center mt-4" style="max-width:420px;margin:24px auto 0;">
+        <div id="promo-section" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px;">
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px;">🎁 Vous avez un code promo ?</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="promo-input" placeholder="Entrez votre code" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:#fff;font-size:0.9rem;text-transform:uppercase;letter-spacing:1px;outline:none;transition:border-color 0.3s;" onfocus="this.style.borderColor='var(--red-primary)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            <button class="btn btn-secondary" id="promo-btn" onclick="validatePromo()" style="padding:10px 18px;font-size:0.85rem;white-space:nowrap;">Appliquer</button>
+          </div>
+          <div id="promo-result" style="display:none;margin-top:10px;padding:8px 12px;border-radius:8px;font-size:0.85rem;"></div>
+        </div>
+      </div>
+
       <div class="text-center mt-4">
         <p style="color: var(--text-muted); font-size: 0.85rem;">
           🛡️ Garantie satisfait ou remboursé 48h &bull; 🔒 Paiement sécurisé Stripe &bull; ⚡ Licence livrée instantanément
@@ -73,15 +85,73 @@
 
   <script nonce="__CSP_NONCE__" src="/js/particles.js"></script>
   <script nonce="__CSP_NONCE__">
+    let activePromo = null;
+    const basePrices = { monthly: 1990, lifetime: 4990 };
+
+    async function validatePromo() {
+      const code = document.getElementById('promo-input').value.trim();
+      const result = document.getElementById('promo-result');
+      const btn = document.getElementById('promo-btn');
+      if (!code) { return; }
+      btn.disabled = true; btn.textContent = '...';
+      try {
+        const r = await fetch('/api/promo/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const d = await r.json();
+        if (d.valid) {
+          activePromo = { code: d.code, discount: d.discount_percent };
+          result.style.display = 'block';
+          result.style.background = 'rgba(34,197,94,0.12)';
+          result.style.border = '1px solid rgba(34,197,94,0.3)';
+          result.style.color = '#22c55e';
+          result.innerHTML = `✅ Code <strong>${d.code}</strong> appliqué ! <strong>-${d.discount_percent}%</strong> sur votre commande`;
+          document.getElementById('promo-input').disabled = true;
+          btn.textContent = '✓';
+          btn.style.background = 'rgba(34,197,94,0.2)';
+          btn.style.borderColor = '#22c55e';
+          btn.style.color = '#22c55e';
+          updatePrices(d.discount_percent);
+        } else {
+          activePromo = null;
+          result.style.display = 'block';
+          result.style.background = 'rgba(239,68,68,0.12)';
+          result.style.border = '1px solid rgba(239,68,68,0.3)';
+          result.style.color = '#ef4444';
+          result.textContent = '❌ ' + (d.error || 'Code invalide');
+          btn.disabled = false; btn.textContent = 'Appliquer';
+        }
+      } catch (e) {
+        result.style.display = 'block';
+        result.style.background = 'rgba(239,68,68,0.12)';
+        result.style.color = '#ef4444';
+        result.textContent = '❌ Erreur serveur';
+        btn.disabled = false; btn.textContent = 'Appliquer';
+      }
+    }
+
+    function updatePrices(discount) {
+      const monthlyNew = (basePrices.monthly * (1 - discount / 100) / 100).toFixed(2);
+      const lifetimeNew = (basePrices.lifetime * (1 - discount / 100) / 100).toFixed(2);
+      document.querySelector('#card-monthly .pricing-price').innerHTML =
+        `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.7em;margin-right:6px;">19.90€</span>${monthlyNew}€ <span>/mois</span>`;
+      document.querySelector('#card-lifetime .pricing-price').innerHTML =
+        `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.7em;margin-right:6px;">49.90€</span>${lifetimeNew}€ <span>une fois</span>`;
+    }
+
     async function checkout(plan) {
       const btn = document.getElementById('btn-' + plan);
       btn.disabled = true;
       btn.textContent = 'Redirection...';
       try {
+        const body = { plan };
+        if (activePromo) body.promo_code = activePromo.code;
         const res = await fetch('/api/stripe/create-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if (data.url) {
@@ -97,6 +167,11 @@
         btn.textContent = 'Sélectionner';
       }
     }
+
+    // Allow Enter key to validate promo
+    document.getElementById('promo-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') validatePromo();
+    });
   </script>
 </body>
 </html>
