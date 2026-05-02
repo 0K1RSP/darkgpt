@@ -60,6 +60,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Logs API
         </a>
+        <a href="#" data-tab="chatlogs" onclick="switchTab('chatlogs',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Questions IA
+        </a>
       </nav>
       <div class="sidebar-footer">
         <div class="admin-user">
@@ -153,6 +157,16 @@
         </div>
       </div>
 
+      <!-- TAB: Chat Logs -->
+      <div id="tab-chatlogs" class="tab-content" style="display:none;">
+        <div class="admin-header"><h1>Questions IA</h1></div>
+        <div class="admin-card">
+          <div class="admin-card-body" id="chatlogs-container">
+            <div class="empty-state"><p>Chargement des questions...</p></div>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB: Promo Codes -->
       <div id="tab-promos" class="tab-content" style="display:none;">
         <div class="admin-header">
@@ -241,6 +255,7 @@
       if(tab==='licenses')loadLicenses();
       if(tab==='dashboard')loadStats();
       if(tab==='logs')loadLogs();
+      if(tab==='chatlogs')loadChatLogs();
       if(tab==='promos')loadPromos();
     }
 
@@ -363,6 +378,24 @@
           <span class="log-status">${l.status||'—'}</span>
           <span style="font-size:0.8rem;color:var(--text-muted)">${l.license_key||''}</span>
           <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
+        </div>`).join('');
+      }catch(e){}
+    }
+
+    async function loadChatLogs(){
+      try{
+        const r=await fetch(API+'/api/admin/chat-logs',{headers:{'Authorization':'Bearer '+token}});
+        const d=await r.json();
+        const c=document.getElementById('chatlogs-container');
+        if(!d.logs||!d.logs.length){c.innerHTML='<div class="empty-state"><p>Aucune question posée pour le moment</p></div>';return;}
+        c.innerHTML=d.logs.map(l=>`<div class="log-item" style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+            <span class="badge badge-monthly" style="font-family:monospace; font-size:0.8rem;">${l.license_key||'—'}</span>
+            <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
+          </div>
+          <div style="background:var(--bg-lighter); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word;">
+            ${(l.message||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+          </div>
         </div>`).join('');
       }catch(e){}
     }
