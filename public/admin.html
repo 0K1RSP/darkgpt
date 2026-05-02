@@ -120,7 +120,14 @@
             </div>
             <div class="form-group">
               <label>Plan</label>
-              <select id="gen-plan"><option value="monthly">Mensuel (30 jours)</option><option value="lifetime">Lifetime</option></select>
+              <select id="gen-plan" onchange="toggleCustomDuration()"><option value="monthly">Mensuel (30 jours)</option><option value="lifetime">Lifetime</option><option value="custom">Personnalisé</option></select>
+            </div>
+            <div class="form-group" id="custom-duration-group" style="display:none;">
+              <label>Durée personnalisée</label>
+              <div style="display:flex;gap:12px;">
+                <input type="number" id="gen-custom-duration" value="1" min="1" style="flex:1;">
+                <select id="gen-duration-unit" style="flex:1;"><option value="minutes">Minutes</option><option value="hours">Heures</option><option value="days">Jours</option><option value="months">Mois</option><option value="years">Années</option></select>
+              </div>
             </div>
             <div class="form-group">
               <label>Notes (optionnel)</label>
@@ -314,14 +321,21 @@
     }
 
     // ===== GENERATE =====
+    function toggleCustomDuration() {
+      const p = document.getElementById('gen-plan').value;
+      document.getElementById('custom-duration-group').style.display = p === 'custom' ? 'block' : 'none';
+    }
+
     async function generateLicenses(){
       const count=parseInt(document.getElementById('gen-count').value)||1;
       const plan=document.getElementById('gen-plan').value;
+      const custom_duration=document.getElementById('gen-custom-duration')?.value;
+      const duration_unit=document.getElementById('gen-duration-unit')?.value;
       const notes=document.getElementById('gen-notes').value;
       const btn=document.getElementById('gen-btn');
       btn.disabled=true;btn.textContent='Génération...';
       try{
-        const r=await fetch(API+'/api/admin/licenses/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({count,plan,notes})});
+        const r=await fetch(API+'/api/admin/licenses/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({count,plan,custom_duration,duration_unit,notes})});
         const d=await r.json();
         if(d.success){
           generatedKeysList=d.licenses;

@@ -308,13 +308,25 @@ app.get('/api/admin/me', adminAuth, (req, res) => {
 // ==================== LICENSE MANAGEMENT ====================
 
 app.post('/api/admin/licenses/generate', adminAuth, (req, res) => {
-  let { count, plan, notes } = req.body;
+  let { count, plan, notes, custom_duration, duration_unit } = req.body;
   count = Math.max(1, Math.min(parseInt(count) || 1, 100));
-  plan = ['monthly', 'lifetime'].includes(plan) ? plan : 'monthly';
+  plan = ['monthly', 'lifetime', 'custom'].includes(plan) ? plan : 'monthly';
   notes = sanitizeInput(notes || '');
 
-  const expiresAt = plan === 'lifetime' ? null :
-    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  let expiresAt = null;
+  if (plan === 'monthly') {
+    expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  } else if (plan === 'custom') {
+    let multiplier = 1;
+    if (duration_unit === 'minutes') multiplier = 60 * 1000;
+    else if (duration_unit === 'hours') multiplier = 60 * 60 * 1000;
+    else if (duration_unit === 'days') multiplier = 24 * 60 * 60 * 1000;
+    else if (duration_unit === 'months') multiplier = 30 * 24 * 60 * 60 * 1000;
+    else if (duration_unit === 'years') multiplier = 365 * 24 * 60 * 60 * 1000;
+    
+    const durationMs = (parseInt(custom_duration) || 1) * multiplier;
+    expiresAt = new Date(Date.now() + durationMs).toISOString();
+  }
 
   const stmt = db.prepare('INSERT INTO licenses (license_key, plan, expires_at, created_by, notes) VALUES (?, ?, ?, ?, ?)');
   const generated = [];
