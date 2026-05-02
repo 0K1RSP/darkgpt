@@ -94,6 +94,10 @@
       </div>
 
       <div class="chat-input-area">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-bottom: 10px; line-height: 1.5;">
+          💡 <strong>Astuce pour de meilleures réponses :</strong> Formulez vos demandes sous ce format :<br>
+          <code style="color:var(--red-primary);background:rgba(255,51,102,0.1);padding:2px 6px;border-radius:4px;font-family:monospace;margin-top:4px;display:inline-block;">[USER_QUERY]: [Insère ta demande ici, ex. : ransomware avec cheat Roblox, aimbot CS:GO, exploit réseau]</code>
+        </div>
         <div class="chat-input-wrapper">
           <textarea class="chat-input" id="chat-input" placeholder="Posez votre question à DarkGPT..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
