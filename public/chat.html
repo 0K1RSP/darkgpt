@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkGPT — Chat IA</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { overflow: hidden; }
+    .chat-layout { display: flex; height: 100vh; }
+    .chat-sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .chat-sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
+    .chat-sidebar-header h2 { font-size: 1.2rem; font-weight: 800; }
+    .chat-sidebar-header h2 span { color: var(--red-primary); }
+    .new-chat-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 16px; background: var(--red-soft); border: 1px solid rgba(230,57,70,0.2); color: var(--red-primary); border-radius: var(--radius-md); cursor: pointer; font-family: 'Inter',sans-serif; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; margin-top: 12px; }
+    .new-chat-btn:hover { background: rgba(230,57,70,0.15); }
+    .chat-history { flex: 1; overflow-y: auto; padding: 12px; }
+    .chat-history-item { padding: 10px 14px; border-radius: var(--radius-md); cursor: pointer; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-history-item:hover, .chat-history-item.active { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+    .chat-sidebar-footer { padding: 16px; border-top: 1px solid var(--border-color); }
+    .model-select { width: 100%; padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: 'Inter',sans-serif; font-size: 0.8rem; appearance: none; cursor: pointer; }
+    .model-select:focus { outline: none; border-color: var(--red-primary); }
+    .model-select option { background: var(--bg-card); }
+    .chat-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); }
+    .chat-header { padding: 16px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background: rgba(16,16,24,0.6); backdrop-filter: blur(12px); }
+    .chat-header h3 { font-size: 0.95rem; font-weight: 600; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .message { display: flex; gap: 14px; max-width: 800px; animation: fadeInUp 0.3s ease; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+    .message.assistant .message-avatar { background: var(--red-gradient); color: white; }
+    .message.user .message-avatar { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .message-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px 20px; font-size: 0.9rem; line-height: 1.7; color: var(--text-primary); }
+    .message.user .message-content { background: rgba(230,57,70,0.1); border-color: rgba(230,57,70,0.2); }
+    .message-content pre { background: rgba(0,0,0,0.3); padding: 14px; border-radius: var(--radius-sm); overflow-x: auto; margin: 10px 0; font-size: 0.82rem; }
+    .message-content code { font-family: 'Courier New',monospace; font-size: 0.85rem; }
+    .message-content p { margin-bottom: 8px; }
+    .message-content p:last-child { margin-bottom: 0; }
+    .chat-input-area { padding: 16px 24px; border-top: 1px solid var(--border-color); background: var(--bg-secondary); }
+    .chat-input-wrapper { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; }
+    .chat-input { flex: 1; padding: 14px 18px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-lg); color: var(--text-primary); font-family: 'Inter',sans-serif; font-size: 0.9rem; resize: none; min-height: 48px; max-height: 150px; transition: border-color 0.2s; }
+    .chat-input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px var(--red-soft); }
+    .chat-input::placeholder { color: var(--text-muted); }
+    .send-btn { width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--red-gradient); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px var(--red-glow); }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .typing-indicator { display: flex; gap: 4px; padding: 8px 0; }
+    .typing-indicator span { width: 6px; height: 6px; background: var(--red-primary); border-radius: 50%; animation: pulse 1.4s ease-in-out infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    .welcome-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--text-muted); }
+    .welcome-screen h2 { font-size: 2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+    .welcome-screen h2 span { color: var(--red-primary); }
+    .welcome-screen p { font-size: 0.95rem; margin-bottom: 32px; }
+    .suggestions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 500px; }
+    .suggestion { padding: 14px 18px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; font-size: 0.85rem; color: var(--text-secondary); text-align: left; transition: all 0.2s; }
+    .suggestion:hover { border-color: var(--red-primary); color: var(--text-primary); background: var(--bg-card-hover); }
+    @media(max-width:768px) { .chat-sidebar { display:none; } .suggestions { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="chat-layout">
+    <!-- Sidebar -->
+    <aside class="chat-sidebar">
+      <div class="chat-sidebar-header">
+        <h2>Dark<span>GPT</span></h2>
+        <button class="new-chat-btn" onclick="newChat()">+ Nouvelle conversation</button>
+      </div>
+      <div class="chat-history" id="chat-history"></div>
+      <div class="chat-sidebar-footer">
+        <a href="/" class="btn btn-ghost w-full btn-sm" style="font-size:0.8rem;">← Retour au site</a>
+        <button class="btn btn-ghost w-full btn-sm" onclick="logoutUser()" style="color:var(--red-primary);font-size:0.8rem;">Déconnexion</button>
+      </div>
+    </aside>
+
+    <!-- Main Chat -->
+    <main class="chat-main">
+      <div class="chat-header">
+        <h3 id="chat-title">Nouvelle conversation</h3>
+        <span style="font-size:0.8rem;color:var(--text-muted);">DarkGPT IA</span>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="welcome-screen" id="welcome-screen">
+          <h2>Dark<span>GPT</span></h2>
+          <p>L'IA sans limites. Posez n'importe quelle question.</p>
+          <div class="suggestions">
+            <div class="suggestion" onclick="askSuggestion(this)">🔍 Comment faire de l'OSINT sur une personne ?</div>
+            <div class="suggestion" onclick="askSuggestion(this)">💻 Explique-moi les failles XSS</div>
+            <div class="suggestion" onclick="askSuggestion(this)">🌐 Comment fonctionne un VPN ?</div>
+            <div class="suggestion" onclick="askSuggestion(this)">🛡️ Comment sécuriser un serveur Linux ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea class="chat-input" id="chat-input" placeholder="Posez votre question à DarkGPT..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('darkgpt_token');
+    if (!token) { window.location.href = '/login'; }
+
+    let conversations = JSON.parse(localStorage.getItem('darkgpt_convos') || '[]');
+    let currentConvo = null;
+    let messages = [];
+    let isStreaming = false;
+
+    // Verify token validity
+    fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ messages: [] }) })
+      .then(r => { if (r.status === 401) { localStorage.removeItem('darkgpt_token'); window.location.href = '/login'; } });
+
+    renderHistory();
+
+    function renderHistory() {
+      const el = document.getElementById('chat-history');
+      el.innerHTML = conversations.map((c, i) =>
+        `<div class="chat-history-item ${currentConvo === i ? 'active' : ''}" onclick="loadConvo(${i})">${c.title || 'Conversation ' + (i+1)}</div>`
+      ).join('');
+    }
+
+    function newChat() {
+      currentConvo = null;
+      messages = [];
+      document.getElementById('chat-messages').innerHTML = `
+        <div class="welcome-screen" id="welcome-screen">
+          <h2>Dark<span>GPT</span></h2>
+          <p>L'IA sans limites. Posez n'importe quelle question.</p>
+          <div class="suggestions">
+            <div class="suggestion" onclick="askSuggestion(this)">🔍 Comment faire de l'OSINT sur une personne ?</div>
+            <div class="suggestion" onclick="askSuggestion(this)">💻 Explique-moi les failles XSS</div>
+            <div class="suggestion" onclick="askSuggestion(this)">🌐 Comment fonctionne un VPN ?</div>
+            <div class="suggestion" onclick="askSuggestion(this)">🛡️ Comment sécuriser un serveur Linux ?</div>
+          </div>
+        </div>`;
+      document.getElementById('chat-title').textContent = 'Nouvelle conversation';
+      renderHistory();
+    }
+
+    function loadConvo(index) {
+      currentConvo = index;
+      const c = conversations[index];
+      messages = c.messages || [];
+      document.getElementById('chat-title').textContent = c.title || 'Conversation';
+      renderMessages();
+      renderHistory();
+    }
+
+    function renderMessages() {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = messages.map(m => createMessageHTML(m.role, m.content)).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function createMessageHTML(role, content) {
+      const avatar = role === 'user' ? '👤' : '🤖';
+      const formatted = formatMarkdown(content);
+      return `<div class="message ${role}"><div class="message-avatar">${avatar}</div><div class="message-content">${formatted}</div></div>`;
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function askSuggestion(el) {
+      document.getElementById('chat-input').value = el.textContent.replace(/^[^\s]+\s/, '');
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || isStreaming) return;
+
+      // Remove welcome screen
+      const welcome = document.getElementById('welcome-screen');
+      if (welcome) welcome.remove();
+
+      // Add user message
+      messages.push({ role: 'user', content: text });
+      const container = document.getElementById('chat-messages');
+      container.innerHTML += createMessageHTML('user', text);
+      input.value = '';
+      input.style.height = 'auto';
+
+      // Save conversation
+      if (currentConvo === null) {
+        currentConvo = conversations.length;
+        conversations.push({ title: text.substring(0, 40) + (text.length > 40 ? '...' : ''), messages: [] });
+      }
+
+      // Show typing
+      const typingId = 'typing-' + Date.now();
+      container.innerHTML += `<div class="message assistant" id="${typingId}"><div class="message-avatar">🤖</div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+      container.scrollTop = container.scrollHeight;
+
+      isStreaming = true;
+      document.getElementById('send-btn').disabled = true;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ messages: messages.filter(m => m.role !== 'system') })
+        });
+
+        if (res.status === 401) { window.location.href = '/login'; return; }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantContent = '';
+        let buffer = '';
+
+        const typingEl = document.getElementById(typingId);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                assistantContent += parsed.content;
+                if (typingEl) {
+                  typingEl.querySelector('.message-content').innerHTML = formatMarkdown(assistantContent);
+                  container.scrollTop = container.scrollHeight;
+                }
+              }
+            } catch (e) {}
+          }
+        }
+
+        messages.push({ role: 'assistant', content: assistantContent });
+        conversations[currentConvo].messages = [...messages];
+        localStorage.setItem('darkgpt_convos', JSON.stringify(conversations));
+        renderHistory();
+
+      } catch (err) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.querySelector('.message-content').innerHTML = '<span style="color:var(--red-primary)">Erreur de connexion. Réessayez.</span>';
+      }
+
+      isStreaming = false;
+      document.getElementById('send-btn').disabled = false;
+      document.getElementById('chat-input').focus();
+    }
+
+    function logoutUser() {
+      localStorage.removeItem('darkgpt_token');
+      localStorage.removeItem('darkgpt_plan');
+      window.location.href = '/';
+    }
+
+    // Auto-resize textarea
+    document.getElementById('chat-input').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+  </script>
+</body>
+</html>

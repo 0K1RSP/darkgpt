@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkGPT — Se Connecter</title>
+  <meta name="description" content="Connectez-vous à DarkGPT avec votre clé de licence pour accéder à l'IA non censurée.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <a href="/" class="navbar-brand">Dark<span>GPT</span></a>
+    <div class="navbar-links">
+      <a href="/">Accueil</a>
+      <a href="/#fonctionnalites">Fonctionnalités</a>
+      <a href="/#comparatif">Comparatif</a>
+      <a href="/#tarifs">Tarifs</a>
+    </div>
+    <div class="navbar-actions">
+      <a href="/login" class="btn btn-ghost active">Se connecter</a>
+      <a href="/buy" class="btn btn-primary">Commencer</a>
+    </div>
+  </nav>
+
+  <!-- Login Form -->
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Dark<span>GPT</span></h2>
+      <p class="subtitle">Entrez votre clé de licence</p>
+      
+      <div id="login-error" class="login-error"></div>
+      <div id="login-success" class="login-success"></div>
+      
+      <form id="login-form">
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="license-key" 
+            placeholder="XXXX-XXXX-XXXX-XXXX" 
+            maxlength="19"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+        <button type="submit" class="btn btn-primary w-full btn-lg" id="login-btn">
+          Activer
+        </button>
+      </form>
+      
+      <div class="login-divider">ou</div>
+      
+      <a href="/buy" class="btn btn-secondary w-full">Obtenir une licence</a>
+      
+      <div class="login-links mt-2">
+        <a href="#">Mentions légales</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/particles.js"></script>
+  <script>
+    const keyInput = document.getElementById('license-key');
+    const form = document.getElementById('login-form');
+    const errorEl = document.getElementById('login-error');
+    const successEl = document.getElementById('login-success');
+    const loginBtn = document.getElementById('login-btn');
+
+    // Auto-format license key with dashes
+    keyInput.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      let formatted = '';
+      for (let i = 0; i < val.length && i < 16; i++) {
+        if (i > 0 && i % 4 === 0) formatted += '-';
+        formatted += val[i];
+      }
+      e.target.value = formatted;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const key = keyInput.value.trim();
+      if (!key || key.length < 19) {
+        showError('Veuillez entrer une clé de licence valide');
+        return;
+      }
+      
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Vérification...';
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+      
+      try {
+        const res = await fetch('/api/license/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ license_key: key })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          localStorage.setItem('darkgpt_token', data.token);
+          localStorage.setItem('darkgpt_plan', data.plan);
+          showSuccess('Licence activée avec succès ! Redirection...');
+          setTimeout(() => {
+            window.location.href = '/chat';
+          }, 1500);
+        } else {
+          showError(data.error || 'Clé de licence invalide');
+        }
+      } catch (err) {
+        showError('Erreur de connexion au serveur');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Activer';
+      }
+    });
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      successEl.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      successEl.textContent = msg;
+      successEl.style.display = 'block';
+      errorEl.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

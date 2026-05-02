@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkGPT — Paiement réussi</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <nav class="navbar"><a href="/" class="navbar-brand">Dark<span>GPT</span></a><div class="navbar-actions"><a href="/login" class="btn btn-primary">Se connecter</a></div></nav>
+
+  <div class="login-container">
+    <div class="login-box" id="success-box">
+      <div style="font-size:3rem;margin-bottom:16px;">🎉</div>
+      <h2>Paiement <span>réussi !</span></h2>
+      <p class="subtitle">Votre licence a été générée automatiquement.</p>
+      <div id="loading" style="padding:24px;"><div class="spinner" style="margin:0 auto;"></div><p style="color:var(--text-muted);font-size:0.85rem;margin-top:12px;">Récupération de votre licence...</p></div>
+      <div id="license-result" style="display:none;">
+        <div style="background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:20px;margin:16px 0;">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">Votre clé de licence :</p>
+          <p id="license-key" style="font-family:'Courier New',monospace;font-size:1.3rem;font-weight:700;color:var(--green);letter-spacing:2px;"></p>
+        </div>
+        <button class="btn btn-secondary w-full" onclick="copyKey()">📋 Copier la clé</button>
+        <a href="/login" class="btn btn-primary w-full mt-2">Activer ma licence →</a>
+      </div>
+      <div id="error-result" style="display:none;" class="login-error"></div>
+    </div>
+  </div>
+
+  <script src="/js/particles.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
+    if (sessionId) {
+      fetch('/api/stripe/success?session_id=' + sessionId)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('loading').style.display = 'none';
+          if (data.success) {
+            document.getElementById('license-key').textContent = data.license_key;
+            document.getElementById('license-result').style.display = 'block';
+          } else {
+            const el = document.getElementById('error-result');
+            el.textContent = data.error || 'Erreur lors de la vérification';
+            el.style.display = 'block';
+          }
+        })
+        .catch(() => {
+          document.getElementById('loading').style.display = 'none';
+          const el = document.getElementById('error-result');
+          el.textContent = 'Erreur de connexion au serveur';
+          el.style.display = 'block';
+        });
+    } else {
+      document.getElementById('loading').style.display = 'none';
+      const el = document.getElementById('error-result');
+      el.textContent = 'Session de paiement introuvable';
+      el.style.display = 'block';
+    }
+
+    function copyKey() {
+      const key = document.getElementById('license-key').textContent;
+      navigator.clipboard.writeText(key);
+      event.target.textContent = '✓ Copié !';
+      setTimeout(() => event.target.textContent = '📋 Copier la clé', 2000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkGPT — Obtenir l'accès</title>
+  <meta name="description" content="Obtenez votre licence DarkGPT et accédez à l'IA non censurée.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+
+  <nav class="navbar" id="navbar">
+    <a href="/" class="navbar-brand">Dark<span>GPT</span></a>
+    <div class="navbar-links">
+      <a href="/">Accueil</a>
+      <a href="/#fonctionnalites">Fonctionnalités</a>
+      <a href="/#comparatif">Comparatif</a>
+      <a href="/#tarifs">Tarifs</a>
+    </div>
+    <div class="navbar-actions">
+      <a href="/login" class="btn btn-ghost">Se connecter</a>
+      <a href="/buy" class="btn btn-primary active">Commencer</a>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top: 120px;">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Accès</span>
+        <h2>Choisissez votre plan</h2>
+        <p>Accédez immédiatement à DarkGPT après l'achat. Paiement sécurisé par Stripe.</p>
+      </div>
+      
+      <div class="pricing-grid">
+        <div class="pricing-card" id="card-monthly">
+          <h3>Mensuel</h3>
+          <div class="pricing-price">19.90€ <span>/mois</span></div>
+          <ul class="pricing-features">
+            <li>Accès IA illimité</li>
+            <li>Recherche web illimitée</li>
+            <li>Outil OSINT</li>
+            <li>Aucune censure</li>
+            <li>Support prioritaire</li>
+          </ul>
+          <button class="btn btn-secondary w-full" id="btn-monthly" onclick="checkout('monthly')">Sélectionner</button>
+        </div>
+        <div class="pricing-card featured" id="card-lifetime">
+          <h3>Lifetime</h3>
+          <div class="pricing-price">49.90€ <span>une fois</span></div>
+          <ul class="pricing-features">
+            <li>Tout le plan Mensuel</li>
+            <li>Accès à vie</li>
+            <li>Mises à jour gratuites</li>
+            <li>Support VIP 24/7</li>
+            <li>Accès anticipé nouveautés</li>
+          </ul>
+          <button class="btn btn-primary w-full" id="btn-lifetime" onclick="checkout('lifetime')">Sélectionner</button>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">
+          🛡️ Garantie satisfait ou remboursé 48h &bull; 🔒 Paiement sécurisé Stripe &bull; ⚡ Licence livrée instantanément
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2024 DarkGPT — Tous droits réservés. | <a href="#">Mentions légales</a> | <a href="#">CGV</a></p>
+  </footer>
+
+  <script src="/js/particles.js"></script>
+  <script>
+    async function checkout(plan) {
+      const btn = document.getElementById('btn-' + plan);
+      btn.disabled = true;
+      btn.textContent = 'Redirection...';
+      try {
+        const res = await fetch('/api/stripe/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert('Erreur: ' + (data.error || 'Impossible de créer la session'));
+          btn.disabled = false;
+          btn.textContent = 'Sélectionner';
+        }
+      } catch (e) {
+        alert('Erreur de connexion au serveur');
+        btn.disabled = false;
+        btn.textContent = 'Sélectionner';
+      }
+    }
+  </script>
+</body>
+</html>
