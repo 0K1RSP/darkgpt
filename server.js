@@ -302,32 +302,38 @@ async function userAuth(req, res, next) {
     req.license = license;
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Session expirée' });
+    console.error('userAuth error:', err.message);
+    return res.status(401).json({ error: 'Session expirée ou invalide' });
   }
 }
 
 // ==================== ADMIN AUTH ROUTES ====================
 
 app.post('/api/admin/login', authLimiter, async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Champs requis' });
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Champs requis' });
 
-  const result = await db.query('SELECT * FROM admins WHERE username = $1', [sanitizeInput(username)]);
-  const admin = result.rows[0];
+    const result = await db.query('SELECT * FROM admins WHERE username = $1', [sanitizeInput(username)]);
+    const admin = result.rows[0];
 
-  // Use constant-time comparison to prevent timing attacks
-  if (!admin || !bcrypt.compareSync(password, admin.password)) {
+    // Use constant-time comparison to prevent timing attacks
+    if (!admin || !bcrypt.compareSync(password, admin.password)) {
+      await db.query('INSERT INTO api_logs (endpoint, ip_address, status) VALUES ($1, $2, $3)', 
+        ['/api/admin/login', getClientIP(req), 'failed_login']
+      );
+      return res.status(401).json({ error: 'Identifiants incorrects' });
+    }
+
+    const token = jwt.sign({ id: admin.id, username: admin.username, isAdmin: true }, JWT_SECRET, { expiresIn: '8h' });
     await db.query('INSERT INTO api_logs (endpoint, ip_address, status) VALUES ($1, $2, $3)', 
-      ['/api/admin/login', getClientIP(req), 'failed_login']
+      ['/api/admin/login', getClientIP(req), 'success']
     );
-    return res.status(401).json({ error: 'Identifiants incorrects' });
+    res.json({ token, username: admin.username });
+  } catch (err) {
+    console.error('Admin login error:', err);
+    res.status(500).json({ error: 'Erreur interne lors de la connexion' });
   }
-
-  const token = jwt.sign({ id: admin.id, username: admin.username, isAdmin: true }, JWT_SECRET, { expiresIn: '8h' });
-  await db.query('INSERT INTO api_logs (endpoint, ip_address, status) VALUES ($1, $2, $3)', 
-    ['/api/admin/login', getClientIP(req), 'success']
-  );
-  res.json({ token, username: admin.username });
 });
 
 app.get('/api/admin/me', adminAuth, (req, res) => {
@@ -531,24 +537,29 @@ app.post('/api/license/verify', authLimiter, async (req, res) => {
 });
 
 app.post('/api/license/login', authLimiter, async (req, res) => {
-  const { license_key } = req.body;
-  if (!license_key || typeof license_key !== 'string') {
-    return res.status(400).json({ success: false, error: 'Clé requise' });
+  try {
+    const { license_key } = req.body;
+    if (!license_key || typeof license_key !== 'string') {
+      return res.status(400).json({ success: false, error: 'Clé requise' });
+    }
+    const cleanKey = sanitizeInput(license_key).toUpperCase();
+    const result = await db.query('SELECT * FROM licenses WHERE license_key = $1', [cleanKey]);
+    const license = result.rows[0];
+
+    if (!license) return res.json({ success: false, error: 'Clé de licence invalide' });
+    if (license.status === 'revoked') return res.json({ success: false, error: 'Licence révoquée' });
+    if (license.expires_at && new Date(license.expires_at) < new Date()) return res.json({ success: false, error: 'Licence expirée' });
+
+    if (!license.activated_at) {
+      await db.query('UPDATE licenses SET activated_at = CURRENT_TIMESTAMP WHERE id = $1', [license.id]);
+    }
+
+    const token = jwt.sign({ license_key: license.license_key, plan: license.plan }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token, plan: license.plan, expires_at: license.expires_at });
+  } catch (err) {
+    console.error('License login error:', err);
+    res.status(500).json({ error: 'Erreur interne lors de la connexion' });
   }
-  const cleanKey = sanitizeInput(license_key).toUpperCase();
-  const result = await db.query('SELECT * FROM licenses WHERE license_key = $1', [cleanKey]);
-  const license = result.rows[0];
-
-  if (!license) return res.json({ success: false, error: 'Clé de licence invalide' });
-  if (license.status === 'revoked') return res.json({ success: false, error: 'Licence révoquée' });
-  if (license.expires_at && new Date(license.expires_at) < new Date()) return res.json({ success: false, error: 'Licence expirée' });
-
-  if (!license.activated_at) {
-    await db.query('UPDATE licenses SET activated_at = CURRENT_TIMESTAMP WHERE id = $1', [license.id]);
-  }
-
-  const token = jwt.sign({ license_key: license.license_key, plan: license.plan }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ success: true, token, plan: license.plan, expires_at: license.expires_at });
 });
 
 // ==================== CHAT AI ROUTE ====================
