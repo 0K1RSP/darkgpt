@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 // ==================== SECURITY CONFIG ====================
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
-const ATLAS_CLOUD_API_KEY = process.env.ATLAS_CLOUD_API_KEY || '';
+const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || '';
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_51S4Oz6ERFgtddT0AxnvdYSnziThmLKXZXJwYPXJen3AxRj6fM0oF3wykhmY7UBCdh2r4OZF7DioEYSJTaLspbWNO00ikU0AdeU';
 const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY || 'pk_test_51S4Oz6ERFgtddT0AXyQ7UlrqR8pbdapLCl1qApNCD8k8kcqrurzO2ocUcDf6Gv3e1iLbE6tbs9QeX1n4OhUEaXFX00RAlRMJam';
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
