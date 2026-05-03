@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
+
 <body>
 
   <!-- Admin Login Screen -->
@@ -40,32 +42,62 @@
       </div>
       <nav class="sidebar-nav">
         <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
           Dashboard
         </a>
         <a href="#" data-tab="licenses" onclick="switchTab('licenses',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
           Licences
         </a>
         <a href="#" data-tab="generate" onclick="switchTab('generate',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
           Générer
         </a>
         <a href="#" data-tab="promos" onclick="switchTab('promos',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+            <line x1="7" y1="7" x2="7.01" y2="7" />
+          </svg>
           Codes Promo
         </a>
 
         <a href="#" data-tab="logs" onclick="switchTab('logs',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
           Logs API
         </a>
         <a href="#" data-tab="chatlogs" onclick="switchTab('chatlogs',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           Questions IA
         </a>
         <a href="#" data-tab="prompt" onclick="switchTab('prompt',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-1.42 1.42"/><path d="m7.06 16.94-1.42 1.42"/><path d="m5.64 5.64 1.42 1.42"/><path d="m16.94 16.94 1.42 1.42"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
+            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="M5 12H3" />
+            <path d="M21 12h-2" />
+            <path d="m18.36 5.64-1.42 1.42" />
+            <path d="m7.06 16.94-1.42 1.42" />
+            <path d="m5.64 5.64 1.42 1.42" />
+            <path d="m16.94 16.94 1.42 1.42" />
+          </svg>
           Configuration IA
         </a>
       </nav>
@@ -77,7 +109,8 @@
             <div class="role">Administrateur</div>
           </div>
         </div>
-        <button class="btn btn-ghost w-full btn-sm mt-2" onclick="logout()" style="color:var(--red-primary)">Déconnexion</button>
+        <button class="btn btn-ghost w-full btn-sm mt-2" onclick="logout()"
+          style="color:var(--red-primary)">Déconnexion</button>
       </div>
     </aside>
 
@@ -89,13 +122,29 @@
         <div class="admin-header">
           <h1>Dashboard</h1>
           <div class="admin-header-actions">
-            <button class="btn btn-primary" onclick="switchTab('generate',document.querySelector('[data-tab=generate]'))">+ Générer des licences</button>
+            <button class="btn btn-primary"
+              onclick="switchTab('generate',document.querySelector('[data-tab=generate]'))">+ Générer des
+              licences</button>
           </div>
         </div>
         <div class="stats-grid" id="stats-grid"></div>
         <div class="admin-card">
-          <div class="admin-card-header"><h3>Dernières licences</h3></div>
-          <div class="admin-card-body"><table class="data-table"><thead><tr><th>Clé</th><th>Plan</th><th>Status</th><th>Créée le</th></tr></thead><tbody id="recent-licenses"></tbody></table></div>
+          <div class="admin-card-header">
+            <h3>Dernières licences</h3>
+          </div>
+          <div class="admin-card-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Clé</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Créée le</th>
+                </tr>
+              </thead>
+              <tbody id="recent-licenses"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -105,21 +154,44 @@
           <h1>Gestion des Licences</h1>
           <div class="admin-header-actions">
             <div class="filter-bar">
-              <select id="filter-status" onchange="loadLicenses()"><option value="">Tous Status</option><option value="active">Active</option><option value="revoked">Révoquée</option></select>
-              <select id="filter-plan" onchange="loadLicenses()"><option value="">Tous Plans</option><option value="monthly">Mensuel</option><option value="lifetime">Lifetime</option></select>
+              <select id="filter-status" onchange="loadLicenses()">
+                <option value="">Tous Status</option>
+                <option value="active">Active</option>
+                <option value="revoked">Révoquée</option>
+              </select>
+              <select id="filter-plan" onchange="loadLicenses()">
+                <option value="">Tous Plans</option>
+                <option value="monthly">Mensuel</option>
+                <option value="lifetime">Lifetime</option>
+              </select>
             </div>
           </div>
         </div>
         <div class="admin-card">
           <div class="admin-card-body" style="padding:0;overflow-x:auto;">
-            <table class="data-table"><thead><tr><th>Clé de licence</th><th>Plan</th><th>Status</th><th>HWID</th><th>Créée le</th><th>Expire le</th><th>Actions</th></tr></thead><tbody id="licenses-table"></tbody></table>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Clé de licence</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>HWID</th>
+                  <th>Créée le</th>
+                  <th>Expire le</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="licenses-table"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <!-- TAB: Generate -->
       <div id="tab-generate" class="tab-content" style="display:none;">
-        <div class="admin-header"><h1>Générer des Licences</h1></div>
+        <div class="admin-header">
+          <h1>Générer des Licences</h1>
+        </div>
         <div class="admin-card" style="max-width:600px;">
           <div class="admin-card-body">
             <div class="form-group">
@@ -128,13 +200,23 @@
             </div>
             <div class="form-group">
               <label>Plan</label>
-              <select id="gen-plan" onchange="toggleCustomDuration()"><option value="monthly">Mensuel (30 jours)</option><option value="lifetime">Lifetime</option><option value="custom">Personnalisé</option></select>
+              <select id="gen-plan" onchange="toggleCustomDuration()">
+                <option value="monthly">Mensuel (30 jours)</option>
+                <option value="lifetime">Lifetime</option>
+                <option value="custom">Personnalisé</option>
+              </select>
             </div>
             <div class="form-group" id="custom-duration-group" style="display:none;">
               <label>Durée personnalisée</label>
               <div style="display:flex;gap:12px;">
                 <input type="number" id="gen-custom-duration" value="1" min="1" style="flex:1;">
-                <select id="gen-duration-unit" style="flex:1;"><option value="minutes">Minutes</option><option value="hours">Heures</option><option value="days">Jours</option><option value="months">Mois</option><option value="years">Années</option></select>
+                <select id="gen-duration-unit" style="flex:1;">
+                  <option value="minutes">Minutes</option>
+                  <option value="hours">Heures</option>
+                  <option value="days">Jours</option>
+                  <option value="months">Mois</option>
+                  <option value="years">Années</option>
+                </select>
               </div>
             </div>
             <div class="form-group">
@@ -153,10 +235,14 @@
 
       <!-- TAB: Logs -->
       <div id="tab-logs" class="tab-content" style="display:none;">
-        <div class="admin-header"><h1>Logs API</h1></div>
+        <div class="admin-header">
+          <h1>Logs API</h1>
+        </div>
         <div class="admin-card">
           <div class="admin-card-body" id="logs-container">
-            <div class="empty-state"><p>Chargement des logs...</p></div>
+            <div class="empty-state">
+              <p>Chargement des logs...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -165,11 +251,15 @@
       <div id="tab-chatlogs" class="tab-content" style="display:none;">
         <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center;">
           <h1>Questions & Réponses IA</h1>
-          <button class="btn btn-danger" style="background:var(--red-primary); color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;" onclick="clearAllChatLogs()">🗑️ Vider l'historique global</button>
+          <button class="btn btn-danger"
+            style="background:var(--red-primary); color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;"
+            onclick="clearAllChatLogs()">🗑️ Vider l'historique global</button>
         </div>
         <div class="admin-card">
           <div class="admin-card-body" id="chatlogs-container">
-            <div class="empty-state"><p>Chargement des questions...</p></div>
+            <div class="empty-state">
+              <p>Chargement des questions...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -183,10 +273,13 @@
         <div class="admin-card" style="flex:1; display:flex; flex-direction:column;">
           <div class="admin-card-header">
             <h3>Modifier le fichier prompt.txt en direct</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:5px;">Ce texte définit le comportement et les règles de l'IA.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:5px;">Ce texte définit le comportement et
+              les règles de l'IA.</p>
           </div>
           <div class="admin-card-body" style="flex:1; display:flex; flex-direction:column; padding:0;">
-            <textarea id="prompt-textarea" style="width:100%; min-height:400px; height:100%; flex:1; padding:20px; border:none; background:var(--bg-lighter); color:var(--text-primary); font-family:monospace; font-size:0.9rem; resize:vertical; outline:none; border-bottom-left-radius:var(--radius-lg); border-bottom-right-radius:var(--radius-lg);" placeholder="Chargement du prompt..."></textarea>
+            <textarea id="prompt-textarea"
+              style="width:100%; min-height:400px; height:100%; flex:1; padding:20px; border:none; background:var(--bg-lighter); color:var(--text-primary); font-family:monospace; font-size:0.9rem; resize:vertical; outline:none; border-bottom-left-radius:var(--radius-lg); border-bottom-right-radius:var(--radius-lg);"
+              placeholder="Chargement du prompt..."></textarea>
           </div>
         </div>
       </div>
@@ -197,7 +290,9 @@
           <h1>Codes Promo</h1>
         </div>
         <div class="admin-card" style="max-width:600px;margin-bottom:24px;">
-          <div class="admin-card-header"><h3>Créer un code promo</h3></div>
+          <div class="admin-card-header">
+            <h3>Créer un code promo</h3>
+          </div>
           <div class="admin-card-body">
             <div class="form-group">
               <label>Code (ex: SUMMER2024)</label>
@@ -221,9 +316,24 @@
           </div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-header"><h3>Codes promo existants</h3></div>
+          <div class="admin-card-header">
+            <h3>Codes promo existants</h3>
+          </div>
           <div class="admin-card-body" style="padding:0;overflow-x:auto;">
-            <table class="data-table"><thead><tr><th>Code</th><th>Réduction</th><th>Utilisé</th><th>Max</th><th>Status</th><th>Expire</th><th>Actions</th></tr></thead><tbody id="promos-table"></tbody></table>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Réduction</th>
+                  <th>Utilisé</th>
+                  <th>Max</th>
+                  <th>Status</th>
+                  <th>Expire</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="promos-table"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -242,41 +352,41 @@
     let generatedKeysList = [];
 
     // ===== AUTH =====
-    document.getElementById('admin-login-form').addEventListener('submit', async(e)=>{
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const u=document.getElementById('admin-username').value;
-      const p=document.getElementById('admin-password').value;
-      try{
-        const r=await fetch(API+'/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-        const d=await r.json();
-        if(d.token){token=d.token;localStorage.setItem('darkgpt_admin_token',token);showDashboard(d.username);}
-        else{document.getElementById('admin-login-error').textContent=d.error||'Erreur';document.getElementById('admin-login-error').style.display='block';}
-      }catch(err){document.getElementById('admin-login-error').textContent='Erreur serveur';document.getElementById('admin-login-error').style.display='block';}
+      const u = document.getElementById('admin-username').value;
+      const p = document.getElementById('admin-password').value;
+      try {
+        const r = await fetch(API + '/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+        const d = await r.json();
+        if (d.token) { token = d.token; localStorage.setItem('darkgpt_admin_token', token); showDashboard(d.username); }
+        else { document.getElementById('admin-login-error').textContent = d.error || 'Erreur'; document.getElementById('admin-login-error').style.display = 'block'; }
+      } catch (err) { document.getElementById('admin-login-error').textContent = 'Erreur serveur'; document.getElementById('admin-login-error').style.display = 'block'; }
     });
 
-    function logout(){token=null;localStorage.removeItem('darkgpt_admin_token');location.reload();}
+    function logout() { token = null; localStorage.removeItem('darkgpt_admin_token'); location.reload(); }
 
-    function showDashboard(username){
-      document.getElementById('admin-login-screen').style.display='none';
-      document.getElementById('admin-dashboard').style.display='flex';
-      if(username){document.getElementById('admin-name').textContent=username;document.getElementById('admin-avatar').textContent=username[0].toUpperCase();}
-      loadStats();loadLicenses();
+    function showDashboard(username) {
+      document.getElementById('admin-login-screen').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'flex';
+      if (username) { document.getElementById('admin-name').textContent = username; document.getElementById('admin-avatar').textContent = username[0].toUpperCase(); }
+      loadStats(); loadLicenses();
     }
 
     // Check token on load
-    if(token){
-      fetch(API+'/api/admin/me',{headers:{'Authorization':'Bearer '+token}})
-        .then(r=>r.json()).then(d=>{if(d.username)showDashboard(d.username);else{token=null;localStorage.removeItem('darkgpt_admin_token');}})
-        .catch(()=>{token=null;localStorage.removeItem('darkgpt_admin_token');});
+    if (token) {
+      fetch(API + '/api/admin/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => r.json()).then(d => { if (d.username) showDashboard(d.username); else { token = null; localStorage.removeItem('darkgpt_admin_token'); } })
+        .catch(() => { token = null; localStorage.removeItem('darkgpt_admin_token'); });
     }
 
     // ===== TABS =====
-    function switchTab(tab,el){
-      document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
-      
-      const tabEl = document.getElementById('tab-'+tab);
-      if(tabEl) {
-        if(tab === 'prompt') {
+    function switchTab(tab, el) {
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+      const tabEl = document.getElementById('tab-' + tab);
+      if (tabEl) {
+        if (tab === 'prompt') {
           tabEl.style.display = 'flex';
           tabEl.style.flexDirection = 'column';
           loadPrompt();
@@ -285,91 +395,91 @@
         }
       }
 
-      document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
-      if(el) el.classList.add('active');
+      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+      if (el) el.classList.add('active');
       else document.querySelector(`[data-tab=${tab}]`).classList.add('active');
 
-      if(tab==='dashboard'){loadStats();loadLicenses();}
-      else if(tab==='licenses')loadLicenses();
-      else if(tab==='logs')loadLogs();
-      else if(tab==='chatlogs')loadChatLogs();
-      else if(tab==='promos')loadPromos();
+      if (tab === 'dashboard') { loadStats(); loadLicenses(); }
+      else if (tab === 'licenses') loadLicenses();
+      else if (tab === 'logs') loadLogs();
+      else if (tab === 'chatlogs') loadChatLogs();
+      else if (tab === 'promos') loadPromos();
     }
 
     // ===== STATS =====
-    async function loadStats(){
-      try{
-        const r=await fetch(API+'/api/admin/stats',{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        document.getElementById('stats-grid').innerHTML=`
+    async function loadStats() {
+      try {
+        const r = await fetch(API + '/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        document.getElementById('stats-grid').innerHTML = `
           <div class="stat-card"><div class="stat-label">Total Licences</div><div class="stat-value">${d.total}</div></div>
           <div class="stat-card"><div class="stat-label">Actives</div><div class="stat-value" style="color:var(--green)">${d.active}</div></div>
           <div class="stat-card"><div class="stat-label">Utilisées</div><div class="stat-value">${d.used}</div></div>
           <div class="stat-card"><div class="stat-label">Révoquées</div><div class="stat-value" style="color:var(--red-primary)">${d.revoked}</div></div>
         `;
         // Recent licenses
-        const tbody=document.getElementById('recent-licenses');
-        if(!d.recentLogs)return;
-      }catch(e){console.error(e);}
+        const tbody = document.getElementById('recent-licenses');
+        if (!d.recentLogs) return;
+      } catch (e) { console.error(e); }
       loadRecentLicenses();
     }
 
-    async function loadRecentLicenses(){
-      try{
-        const r=await fetch(API+'/api/admin/licenses?limit=5',{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        const tbody=document.getElementById('recent-licenses');
-        tbody.innerHTML=d.licenses.map(l=>`<tr>
+    async function loadRecentLicenses() {
+      try {
+        const r = await fetch(API + '/api/admin/licenses?limit=5', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        const tbody = document.getElementById('recent-licenses');
+        tbody.innerHTML = d.licenses.map(l => `<tr>
           <td class="key-cell">${l.license_key}</td>
           <td><span class="badge badge-${l.plan}">${l.plan}</span></td>
           <td><span class="badge badge-${l.status}">${l.status}</span></td>
           <td>${new Date(l.created_at).toLocaleDateString('fr-FR')}</td>
         </tr>`).join('');
-      }catch(e){}
+      } catch (e) { }
     }
 
     // ===== LICENSES =====
-    async function loadLicenses(){
-      const status=document.getElementById('filter-status')?.value||'';
-      const plan=document.getElementById('filter-plan')?.value||'';
-      let url=API+'/api/admin/licenses?limit=100';
-      if(status)url+='&status='+status;
-      if(plan)url+='&plan='+plan;
-      try{
-        const r=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        const tbody=document.getElementById('licenses-table');
-        if(!d.licenses.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Aucune licence trouvée</td></tr>';return;}
-        tbody.innerHTML=d.licenses.map(l=>`<tr>
+    async function loadLicenses() {
+      const status = document.getElementById('filter-status')?.value || '';
+      const plan = document.getElementById('filter-plan')?.value || '';
+      let url = API + '/api/admin/licenses?limit=100';
+      if (status) url += '&status=' + status;
+      if (plan) url += '&plan=' + plan;
+      try {
+        const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        const tbody = document.getElementById('licenses-table');
+        if (!d.licenses.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Aucune licence trouvée</td></tr>'; return; }
+        tbody.innerHTML = d.licenses.map(l => `<tr>
           <td class="key-cell">${l.license_key}</td>
           <td><span class="badge badge-${l.plan}">${l.plan}</span></td>
           <td><span class="badge badge-${l.status}">${l.status}</span></td>
-          <td style="font-size:0.8rem;color:var(--text-muted)">${l.hwid?l.hwid.substring(0,12)+'...':'—'}</td>
+          <td style="font-size:0.8rem;color:var(--text-muted)">${l.hwid ? l.hwid.substring(0, 12) + '...' : '—'}</td>
           <td style="font-size:0.8rem">${new Date(l.created_at).toLocaleDateString('fr-FR')}</td>
-          <td style="font-size:0.8rem">${l.expires_at?new Date(l.expires_at).toLocaleDateString('fr-FR'):'∞'}</td>
+          <td style="font-size:0.8rem">${l.expires_at ? new Date(l.expires_at).toLocaleDateString('fr-FR') : '∞'}</td>
           <td><div class="action-btns">
-            ${l.status==='active'?`<button class="action-btn danger" title="Révoquer" onclick="revokeLicense(${l.id})">✕</button>`:''}
-            ${l.hwid?`<button class="action-btn" title="Reset HWID" onclick="resetHwid(${l.id})">↺</button>`:''}
+            ${l.status === 'active' ? `<button class="action-btn danger" title="Révoquer" onclick="revokeLicense(${l.id})">✕</button>` : ''}
+            ${l.hwid ? `<button class="action-btn" title="Reset HWID" onclick="resetHwid(${l.id})">↺</button>` : ''}
             <button class="action-btn danger" title="Supprimer" onclick="deleteLicense(${l.id})">🗑</button>
           </div></td>
         </tr>`).join('');
-      }catch(e){console.error(e);}
+      } catch (e) { console.error(e); }
     }
 
-    async function revokeLicense(id){
-      if(!confirm('Révoquer cette licence ?'))return;
-      await fetch(API+'/api/admin/licenses/'+id+'/revoke',{method:'PATCH',headers:{'Authorization':'Bearer '+token}});
-      toast('Licence révoquée','success');loadLicenses();loadStats();
+    async function revokeLicense(id) {
+      if (!confirm('Révoquer cette licence ?')) return;
+      await fetch(API + '/api/admin/licenses/' + id + '/revoke', { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
+      toast('Licence révoquée', 'success'); loadLicenses(); loadStats();
     }
-    async function resetHwid(id){
-      if(!confirm('Reset le HWID de cette licence ?'))return;
-      await fetch(API+'/api/admin/licenses/'+id+'/reset-hwid',{method:'PATCH',headers:{'Authorization':'Bearer '+token}});
-      toast('HWID réinitialisé','success');loadLicenses();
+    async function resetHwid(id) {
+      if (!confirm('Reset le HWID de cette licence ?')) return;
+      await fetch(API + '/api/admin/licenses/' + id + '/reset-hwid', { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
+      toast('HWID réinitialisé', 'success'); loadLicenses();
     }
-    async function deleteLicense(id){
-      if(!confirm('Supprimer définitivement cette licence ?'))return;
-      await fetch(API+'/api/admin/licenses/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
-      toast('Licence supprimée','success');loadLicenses();loadStats();
+    async function deleteLicense(id) {
+      if (!confirm('Supprimer définitivement cette licence ?')) return;
+      await fetch(API + '/api/admin/licenses/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+      toast('Licence supprimée', 'success'); loadLicenses(); loadStats();
     }
 
     // ===== GENERATE =====
@@ -378,168 +488,169 @@
       document.getElementById('custom-duration-group').style.display = p === 'custom' ? 'block' : 'none';
     }
 
-    async function generateLicenses(){
-      const count=parseInt(document.getElementById('gen-count').value)||1;
-      const plan=document.getElementById('gen-plan').value;
-      const custom_duration=document.getElementById('gen-custom-duration')?.value;
-      const duration_unit=document.getElementById('gen-duration-unit')?.value;
-      const notes=document.getElementById('gen-notes').value;
-      const btn=document.getElementById('gen-btn');
-      btn.disabled=true;btn.textContent='Génération...';
-      try{
-        const r=await fetch(API+'/api/admin/licenses/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({count,plan,custom_duration,duration_unit,notes})});
-        const d=await r.json();
-        if(d.success){
-          generatedKeysList=d.licenses;
-          const container=document.getElementById('generated-keys');
-          container.innerHTML=d.licenses.map(k=>`<div class="generated-key-item"><span>${k}</span><button class="copy-btn" onclick="copyKey(this,'${k}')">📋</button></div>`).join('');
-          document.getElementById('generated-result').style.display='block';
-          toast(`${d.licenses.length} licence(s) générée(s)`,'success');
+    async function generateLicenses() {
+      const count = parseInt(document.getElementById('gen-count').value) || 1;
+      const plan = document.getElementById('gen-plan').value;
+      const custom_duration = document.getElementById('gen-custom-duration')?.value;
+      const duration_unit = document.getElementById('gen-duration-unit')?.value;
+      const notes = document.getElementById('gen-notes').value;
+      const btn = document.getElementById('gen-btn');
+      btn.disabled = true; btn.textContent = 'Génération...';
+      try {
+        const r = await fetch(API + '/api/admin/licenses/generate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ count, plan, custom_duration, duration_unit, notes }) });
+        const d = await r.json();
+        if (d.success) {
+          generatedKeysList = d.licenses;
+          const container = document.getElementById('generated-keys');
+          container.innerHTML = d.licenses.map(k => `<div class="generated-key-item"><span>${k}</span><button class="copy-btn" onclick="copyKey(this,'${k}')">📋</button></div>`).join('');
+          document.getElementById('generated-result').style.display = 'block';
+          toast(`${d.licenses.length} licence(s) générée(s)`, 'success');
         }
-      }catch(e){toast('Erreur de génération','error');}
-      btn.disabled=false;btn.textContent='Générer';
+      } catch (e) { toast('Erreur de génération', 'error'); }
+      btn.disabled = false; btn.textContent = 'Générer';
     }
 
-    function copyKey(btn,key){navigator.clipboard.writeText(key);btn.classList.add('copied');btn.textContent='✓';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='📋';},1500);}
-    function copyAllKeys(){navigator.clipboard.writeText(generatedKeysList.join('\n'));toast('Toutes les clés copiées !','success');}
+    function copyKey(btn, key) { navigator.clipboard.writeText(key); btn.classList.add('copied'); btn.textContent = '✓'; setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋'; }, 1500); }
+    function copyAllKeys() { navigator.clipboard.writeText(generatedKeysList.join('\n')); toast('Toutes les clés copiées !', 'success'); }
 
     // ===== LOGS =====
-    async function loadLogs(){
-      try{
-        const r=await fetch(API+'/api/admin/stats',{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        const c=document.getElementById('logs-container');
-        if(!d.recentLogs||!d.recentLogs.length){c.innerHTML='<div class="empty-state"><p>Aucun log disponible</p></div>';return;}
-        c.innerHTML=d.recentLogs.map(l=>`<div class="log-item">
+    async function loadLogs() {
+      try {
+        const r = await fetch(API + '/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        const c = document.getElementById('logs-container');
+        if (!d.recentLogs || !d.recentLogs.length) { c.innerHTML = '<div class="empty-state"><p>Aucun log disponible</p></div>'; return; }
+        c.innerHTML = d.recentLogs.map(l => `<div class="log-item">
           <span class="log-endpoint">${l.endpoint}</span>
-          <span class="log-status">${l.status||'—'}</span>
-          <span style="font-size:0.8rem;color:var(--text-muted)">${l.license_key||''}</span>
+          <span class="log-status">${l.status || '—'}</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)">${l.license_key || ''}</span>
           <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
         </div>`).join('');
-      }catch(e){}
+      } catch (e) { }
     }
 
-    async function loadChatLogs(){
-      try{
-        const r=await fetch(API+'/api/admin/chat-logs',{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        const c=document.getElementById('chatlogs-container');
-        if(!d.logs||!d.logs.length){c.innerHTML='<div class="empty-state"><p>Aucune question posée pour le moment</p></div>';return;}
-        c.innerHTML=d.logs.map(l=>`<div class="log-item" style="display:flex; flex-direction:column; gap:8px;">
+    async function loadChatLogs() {
+      try {
+        const r = await fetch(API + '/api/admin/chat-logs', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        const c = document.getElementById('chatlogs-container');
+        if (!d.logs || !d.logs.length) { c.innerHTML = '<div class="empty-state"><p>Aucune question posée pour le moment</p></div>'; return; }
+        c.innerHTML = d.logs.map(l => `<div class="log-item" style="display:flex; flex-direction:column; gap:8px;">
           <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-            <span class="badge badge-monthly" style="font-family:monospace; font-size:0.8rem;">${l.license_key||'—'}</span>
+            <span class="badge badge-monthly" style="font-family:monospace; font-size:0.8rem;">${l.license_key || '—'}</span>
             <div style="display:flex; align-items:center; gap:10px;">
               <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
               <button class="action-btn danger" style="padding:2px 6px;" title="Supprimer" onclick="deleteChatLog(${l.id})">🗑️</button>
             </div>
           </div>
           <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word;">
-            <strong style="color:white;">Client :</strong> ${(l.message||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+            <strong style="color:white;">Client :</strong> ${(l.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           </div>
           ${l.response ? `<div style="background:rgba(230,57,70,0.1); border-left:3px solid var(--red-primary); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word; max-height: 200px; overflow-y:auto;">
-            <strong style="color:var(--red-primary);">IA :</strong> ${(l.response||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+            <strong style="color:var(--red-primary);">IA :</strong> ${(l.response || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           </div>` : ''}
         </div>`).join('');
-      }catch(e){}
+      } catch (e) { }
     }
 
     async function deleteChatLog(id) {
-      if(!confirm('Supprimer ce log ?')) return;
+      if (!confirm('Supprimer ce log ?')) return;
       try {
-        await fetch(API+'/api/admin/chat-logs/'+id, {method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+        await fetch(API + '/api/admin/chat-logs/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         toast('Log supprimé', 'success');
         loadChatLogs();
-      } catch(e) { toast('Erreur', 'error'); }
+      } catch (e) { toast('Erreur', 'error'); }
     }
 
     async function clearAllChatLogs() {
-      if(!confirm('Êtes-vous sûr de vouloir supprimer TOUT l\'historique de chat de tous les utilisateurs ?')) return;
+      if (!confirm('Êtes-vous sûr de vouloir supprimer TOUT l\'historique de chat de tous les utilisateurs ?')) return;
       try {
-        await fetch(API+'/api/admin/chat-logs', {method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+        await fetch(API + '/api/admin/chat-logs', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         toast('Historique vidé avec succès', 'success');
         loadChatLogs();
-      } catch(e) { toast('Erreur', 'error'); }
+      } catch (e) { toast('Erreur', 'error'); }
     }
 
     // ===== TOAST =====
-    function toast(msg,type='info'){
-      const c=document.getElementById('toast-container');
-      const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
-      c.appendChild(t);setTimeout(()=>t.remove(),3000);
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg;
+      c.appendChild(t); setTimeout(() => t.remove(), 3000);
     }
 
     // ===== PROMO CODES =====
-    async function loadPromos(){
-      try{
-        const r=await fetch(API+'/api/admin/promos',{headers:{'Authorization':'Bearer '+token}});
-        const d=await r.json();
-        const tbody=document.getElementById('promos-table');
-        if(!d.promos.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Aucun code promo</td></tr>';return;}
-        tbody.innerHTML=d.promos.map(p=>`<tr>
+    async function loadPromos() {
+      try {
+        const r = await fetch(API + '/api/admin/promos', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        const tbody = document.getElementById('promos-table');
+        if (!d.promos.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Aucun code promo</td></tr>'; return; }
+        tbody.innerHTML = d.promos.map(p => `<tr>
           <td style="font-weight:700;font-family:monospace;letter-spacing:1px;">${p.code}</td>
           <td><span class="badge badge-lifetime">${p.discount_percent}%</span></td>
           <td>${p.used_count}</td>
-          <td>${p.max_uses||'\u221e'}</td>
+          <td>${p.max_uses || '\u221e'}</td>
           <td><span class="badge badge-${p.status}">${p.status}</span></td>
-          <td style="font-size:0.8rem">${p.expires_at?new Date(p.expires_at).toLocaleDateString('fr-FR'):'\u221e'}</td>
+          <td style="font-size:0.8rem">${p.expires_at ? new Date(p.expires_at).toLocaleDateString('fr-FR') : '\u221e'}</td>
           <td><div class="action-btns">
-            <button class="action-btn" title="${p.status==='active'?'D\u00e9sactiver':'Activer'}" onclick="togglePromo(${p.id})">${p.status==='active'?'\u23f8':'\u25b6'}</button>
+            <button class="action-btn" title="${p.status === 'active' ? 'D\u00e9sactiver' : 'Activer'}" onclick="togglePromo(${p.id})">${p.status === 'active' ? '\u23f8' : '\u25b6'}</button>
             <button class="action-btn danger" title="Supprimer" onclick="deletePromo(${p.id})">\ud83d\uddd1</button>
           </div></td>
         </tr>`).join('');
-      }catch(e){console.error(e);}
+      } catch (e) { console.error(e); }
     }
 
-    async function createPromo(){
-      const code=document.getElementById('promo-code').value;
-      const discount_percent=parseInt(document.getElementById('promo-discount').value)||10;
-      const max_uses=document.getElementById('promo-maxuses').value?parseInt(document.getElementById('promo-maxuses').value):null;
-      const expires_at=document.getElementById('promo-expires').value||null;
-      if(!code){toast('Entrez un code promo','error');return;}
-      try{
-        const r=await fetch(API+'/api/admin/promos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({code,discount_percent,max_uses,expires_at})});
-        const d=await r.json();
-        if(d.success){toast(`Code ${d.code} cr\u00e9\u00e9 (-${d.discount_percent}%)`,'success');document.getElementById('promo-code').value='';loadPromos();}
-        else toast(d.error||'Erreur','error');
-      }catch(e){toast('Erreur serveur','error');}
+    async function createPromo() {
+      const code = document.getElementById('promo-code').value;
+      const discount_percent = parseInt(document.getElementById('promo-discount').value) || 10;
+      const max_uses = document.getElementById('promo-maxuses').value ? parseInt(document.getElementById('promo-maxuses').value) : null;
+      const expires_at = document.getElementById('promo-expires').value || null;
+      if (!code) { toast('Entrez un code promo', 'error'); return; }
+      try {
+        const r = await fetch(API + '/api/admin/promos', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ code, discount_percent, max_uses, expires_at }) });
+        const d = await r.json();
+        if (d.success) { toast(`Code ${d.code} cr\u00e9\u00e9 (-${d.discount_percent}%)`, 'success'); document.getElementById('promo-code').value = ''; loadPromos(); }
+        else toast(d.error || 'Erreur', 'error');
+      } catch (e) { toast('Erreur serveur', 'error'); }
     }
 
-    async function togglePromo(id){
-      await fetch(API+'/api/admin/promos/'+id+'/toggle',{method:'PATCH',headers:{'Authorization':'Bearer '+token}});
-      toast('Statut mis \u00e0 jour','success');loadPromos();
+    async function togglePromo(id) {
+      await fetch(API + '/api/admin/promos/' + id + '/toggle', { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
+      toast('Statut mis \u00e0 jour', 'success'); loadPromos();
     }
-    async function deletePromo(id){
-      if(!confirm('Supprimer ce code promo ?'))return;
-      await fetch(API+'/api/admin/promos/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
-      toast('Code promo supprim\u00e9','success');loadPromos();
+    async function deletePromo(id) {
+      if (!confirm('Supprimer ce code promo ?')) return;
+      await fetch(API + '/api/admin/promos/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+      toast('Code promo supprim\u00e9', 'success'); loadPromos();
     }
 
     // ===== PROMPT CONFIG =====
     async function loadPrompt() {
       try {
-        const r = await fetch(API+'/api/admin/prompt', {headers:{'Authorization':'Bearer '+token}});
+        const r = await fetch(API + '/api/admin/prompt', { headers: { 'Authorization': 'Bearer ' + token } });
         const d = await r.json();
-        if(d.success) {
+        if (d.success) {
           document.getElementById('prompt-textarea').value = d.content;
         } else {
           toast(d.error || 'Erreur chargement prompt', 'error');
         }
-      } catch(e) { toast('Erreur serveur', 'error'); }
+      } catch (e) { toast('Erreur serveur', 'error'); }
     }
 
     async function savePrompt() {
       const content = document.getElementById('prompt-textarea').value;
       try {
-        const r = await fetch(API+'/api/admin/prompt', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-          body:JSON.stringify({content})
+        const r = await fetch(API + '/api/admin/prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ content })
         });
         const d = await r.json();
-        if(d.success) toast('Prompt sauvegardé avec succès !', 'success');
+        if (d.success) toast('Prompt sauvegardé avec succès !', 'success');
         else toast(d.error || 'Erreur sauvegarde', 'error');
-      } catch(e) { toast('Erreur serveur', 'error'); }
+      } catch (e) { toast('Erreur serveur', 'error'); }
     }
   </script>
 </body>
+
 </html>
