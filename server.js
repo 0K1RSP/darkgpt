@@ -704,10 +704,10 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
       finalPrompt = prompt + ', RAW photo, photorealistic, hyperrealistic, 8k UHD';
     }
 
-    // 2. Generate Pollinations URL with the refined prompt + flux model for max realism
+    // 2. Generate Pollinations URL - Removed Flux and Enhance to reduce censorship
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(finalPrompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&nologo=true&width=1024&height=1024&enhance=true&model=flux`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&nologo=true&width=1024&height=1024`;
 
     // Log in chat history
     db.prepare('INSERT INTO chat_logs (license_key, message, response) VALUES (?, ?, ?)').run(
