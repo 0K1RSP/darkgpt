@@ -494,6 +494,15 @@
     function formatMarkdown(text) {
       if (!text) return '';
       return text
+        // Images: ![alt](url)
+        .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+          return `
+            <div style="margin-top: 10px;">
+              <img src="${url}" alt="${alt}" style="max-width:100%; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow: var(--shadow-md); display: block;">
+              <a href="${url}" target="_blank" download="image.png" style="display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--red-primary); text-decoration: none; font-weight: 600;">📥 Télécharger l'image</a>
+            </div>
+          `;
+        })
         .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
         .replace(/`([^`]+)`/g, '<code>$1</code>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
