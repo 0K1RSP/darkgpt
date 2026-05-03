@@ -133,7 +133,15 @@ function serveHTML(file, opts = {}) {
 }
 
 // ==================== DATABASE ====================
-const db = new Database(path.join(__dirname, 'database.db'));
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'database.db');
+
+// Ensure directory exists if a custom path is provided
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const db = new Database(dbPath);
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
