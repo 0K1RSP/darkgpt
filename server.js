@@ -731,6 +731,7 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
         errorMessage = errorData.error || errorMessage;
       } catch (e) {
         const text = await clonedResponse.text();
+        console.error('RAW HF ERROR:', text); // Log this to see exactly what they say
         if (text.includes('currently loading')) errorMessage = "L'IA est en train de démarrer, réessayez dans 30 secondes.";
         else errorMessage = "Le service d'image est temporairement indisponible.";
       }
