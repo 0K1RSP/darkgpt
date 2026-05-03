@@ -406,7 +406,8 @@
 
       <div class="chat-input-area">
         <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
-          💡 Tape <strong style="color:var(--red-primary)">/image</strong> suivi d'une description pour générer une image.
+          💡 Tape <strong style="color:var(--red-primary)">/image</strong> suivi d'une description pour générer une
+          image.
         </div>
         <div class="chat-input-wrapper">
           <textarea class="chat-input" id="chat-input" placeholder="Posez votre question à DarkGPT..." rows="1"
@@ -659,7 +660,7 @@
       isCooldown = true;
       const btn = document.getElementById('send-btn');
       btn.disabled = true;
-      let seconds = 30;
+      let seconds = 45;
       btn.innerHTML = `<span style="font-size:0.75rem;font-weight:700;">${seconds}s</span>`;
       const interval = setInterval(() => {
         seconds--;
