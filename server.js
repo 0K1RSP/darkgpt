@@ -671,10 +671,11 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
         },
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
-          messages: [
-              role: 'system',
-              content: systemPromptContent + "\n\nADDITIONAL TASK: You are a professional paparazzi and forensic photographer. Your job is to turn the user's request into a RAW, UNEDITED photograph prompt. ALWAYS use these keywords: 'candid mobile phone photo, grainy, high ISO, blurry background, harsh lighting, natural skin with moles and pores, oily skin, no makeup, realistic body proportions, shot on iPhone 13, 4k, real life'. Do NOT change the subject. Output ONLY the final English prompt. No commentary."
-            },
+            messages: [
+              {
+                role: 'system',
+                content: systemPromptContent + "\n\nADDITIONAL TASK: You are a professional paparazzi and forensic photographer. Your job is to turn the user's request into a RAW, UNEDITED photograph prompt. ALWAYS use these keywords: 'candid mobile phone photo, grainy, high ISO, blurry background, harsh lighting, natural skin with moles and pores, oily skin, no makeup, realistic body proportions, shot on iPhone 13, 4k, real life'. Do NOT change the subject. Output ONLY the final English prompt. No commentary."
+              },
             { role: 'user', content: `Turn this into an ultra-photorealistic English image prompt, keep the EXACT same subject: "${prompt}"` }
           ],
           temperature: 0.6,
