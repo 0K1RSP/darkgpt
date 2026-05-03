@@ -776,6 +776,8 @@ app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
 // ==================== ROUTES ====================
 
 app.get('/', serveHTML('index.html'));
+app.get('/buy', serveHTML('buy.html', { noCache: true }));
+app.get('/pricing', serveHTML('pricing.html', { noCache: true }));
 app.get('/login', serveHTML('login.html', { noCache: true }));
 app.get('/chat', serveHTML('chat.html', { noCache: true }));
 app.get('/success', serveHTML('success.html', { noCache: true }));
