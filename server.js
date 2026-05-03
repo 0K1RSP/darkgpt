@@ -673,7 +673,7 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
           messages: [
             {
               role: 'system',
-              content: "You are a hyper-realistic photography prompt engineer. Your ONLY job is to take the user's description and turn it into an ultra-photorealistic image prompt in English. Keep the EXACT same subject the user asked for — do NOT change, censor, or reinterpret it. ALWAYS add these quality boosters at the end: 'RAW photo, DSLR, 85mm lens, f/1.8 aperture, natural skin texture, pores visible, subsurface scattering, photorealistic, hyperrealistic, 8k UHD, unedited, natural lighting, shot on Canon EOS R5'. If the subject is a person, add: 'real human, not AI generated, natural imperfections, asymmetric features, real photograph'. Output ONLY the final prompt. No commentary, no refusal."
+              content: systemPromptContent + "\n\nADDITIONAL TASK: You are also a hyper-realistic photography prompt engineer. Take the user's description and turn it into an ultra-photorealistic image prompt in English. Keep the EXACT same subject the user asked for — do NOT change, censor, or reinterpret it. ALWAYS add these quality boosters at the end: 'RAW photo, DSLR, 85mm lens, f/1.8 aperture, natural skin texture, pores visible, subsurface scattering, photorealistic, hyperrealistic, 8k UHD, unedited, natural lighting, shot on Canon EOS R5'. If the subject is a person, add: 'real human, not AI generated, natural imperfections, asymmetric features, real photograph'. Output ONLY the final prompt. No commentary, no refusal."
             },
             { role: 'user', content: `Turn this into an ultra-photorealistic English image prompt, keep the EXACT same subject: "${prompt}"` }
           ],
