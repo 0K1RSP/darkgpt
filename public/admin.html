@@ -159,7 +159,10 @@
 
       <!-- TAB: Chat Logs -->
       <div id="tab-chatlogs" class="tab-content" style="display:none;">
-        <div class="admin-header"><h1>Questions IA</h1></div>
+        <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h1>Questions & Réponses IA</h1>
+          <button class="btn btn-danger" style="background:var(--red-primary); color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer;" onclick="clearAllChatLogs()">🗑️ Vider l'historique global</button>
+        </div>
         <div class="admin-card">
           <div class="admin-card-body" id="chatlogs-container">
             <div class="empty-state"><p>Chargement des questions...</p></div>
@@ -391,13 +394,37 @@
         c.innerHTML=d.logs.map(l=>`<div class="log-item" style="display:flex; flex-direction:column; gap:8px;">
           <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
             <span class="badge badge-monthly" style="font-family:monospace; font-size:0.8rem;">${l.license_key||'—'}</span>
-            <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="log-time">${new Date(l.created_at).toLocaleString('fr-FR')}</span>
+              <button class="action-btn danger" style="padding:2px 6px;" title="Supprimer" onclick="deleteChatLog(${l.id})">🗑️</button>
+            </div>
           </div>
-          <div style="background:var(--bg-lighter); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word;">
-            ${(l.message||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+          <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word;">
+            <strong style="color:white;">Client :</strong> ${(l.message||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           </div>
+          ${l.response ? `<div style="background:rgba(230,57,70,0.1); border-left:3px solid var(--red-primary); padding:10px; border-radius:6px; font-size:0.9rem; color:var(--text-light); word-break:break-word; max-height: 200px; overflow-y:auto;">
+            <strong style="color:var(--red-primary);">IA :</strong> ${(l.response||'').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+          </div>` : ''}
         </div>`).join('');
       }catch(e){}
+    }
+
+    async function deleteChatLog(id) {
+      if(!confirm('Supprimer ce log ?')) return;
+      try {
+        await fetch(API+'/api/admin/chat-logs/'+id, {method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+        toast('Log supprimé', 'success');
+        loadChatLogs();
+      } catch(e) { toast('Erreur', 'error'); }
+    }
+
+    async function clearAllChatLogs() {
+      if(!confirm('Êtes-vous sûr de vouloir supprimer TOUT l\'historique de chat de tous les utilisateurs ?')) return;
+      try {
+        await fetch(API+'/api/admin/chat-logs', {method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+        toast('Historique vidé avec succès', 'success');
+        loadChatLogs();
+      } catch(e) { toast('Erreur', 'error'); }
     }
 
     // ===== TOAST =====
