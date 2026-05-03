@@ -31,7 +31,7 @@
       <div class="section-header">
         <span class="section-tag">Accès</span>
         <h2>Choisissez votre plan</h2>
-        <p>Accédez immédiatement à DarkGPT après l'achat. Paiement sécurisé par Stripe.</p>
+        <p>Accédez immédiatement à DarkGPT après l'achat. Paiement sécurisé.</p>
       </div>
 
       <div class="pricing-grid">
@@ -74,10 +74,7 @@
           </h3>
 
           <div id="payment-options" style="display: flex; flex-direction: column; gap: 12px;">
-            <button onclick="payStripe()" class="btn btn-primary"
-              style="display: flex; justify-content: center; gap: 10px; background: #6366f1; border-color: #6366f1;">
-              💳 Carte Bancaire (Automatique)
-            </button>
+
             <button onclick="showManualInstruction('paypal')" class="btn btn-secondary"
               style="display: flex; justify-content: center; gap: 10px;">
               🅿️ PayPal (Manuel)
@@ -138,7 +135,7 @@
           <span style="display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg> Paiement sécurisé Stripe</span>
+            </svg> Paiement sécurisé</span>
           <span style="display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12" />
@@ -199,10 +196,7 @@
       document.getElementById('payment-instruction').style.display = 'block';
     }
 
-    function payStripe() {
-      closePaymentModal();
-      checkout(selectedPlan);
-    }
+
 
     async function validatePromo() {
       const code = document.getElementById('promo-input').value.trim();
@@ -257,32 +251,7 @@
         `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.7em;margin-right:6px;">50€</span>${parseFloat(lifetimeNew)}€ <span>une fois</span>`;
     }
 
-    async function checkout(plan) {
-      const btn = document.getElementById('btn-' + plan);
-      btn.disabled = true;
-      btn.textContent = 'Redirection...';
-      try {
-        const body = { plan };
-        if (activePromo) body.promo_code = activePromo.code;
-        const res = await fetch('/api/stripe/create-checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert('Erreur: ' + (data.error || 'Impossible de créer la session'));
-          btn.disabled = false;
-          btn.textContent = 'Sélectionner';
-        }
-      } catch (e) {
-        alert('Erreur de connexion au serveur');
-        btn.disabled = false;
-        btn.textContent = 'Sélectionner';
-      }
-    }
+
 
     // Allow Enter key to validate promo
     document.getElementById('promo-input').addEventListener('keypress', (e) => {

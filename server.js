@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
-const Stripe = require('stripe');
+
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
@@ -22,10 +22,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const HF_TOKEN = process.env.HUGGINGFACE_TOKEN || '';
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_51S4Oz6ERFgtddT0AxnvdYSnziThmLKXZXJwYPXJen3AxRj6fM0oF3wykhmY7UBCdh2r4OZF7DioEYSJTaLspbWNO00ikU0AdeU';
-const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY || 'pk_test_51S4Oz6ERFgtddT0AXyQ7UlrqR8pbdapLCl1qApNCD8k8kcqrurzO2ocUcDf6Gv3e1iLbE6tbs9QeX1n4OhUEaXFX00RAlRMJam';
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
-const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 // Admin credentials
 const ADMIN_USERNAME = 'ansaru';
@@ -94,12 +91,7 @@ const chatLimiter = rateLimit({
   validate: { xForwardedForHeader: false }
 });
 
-// Stripe rate limiter - 10 checkouts per 10 min
-const stripeLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 10,
-  message: { error: 'Trop de tentatives de paiement.' },
-});
+
 
 // Static files with cache headers
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -114,13 +106,13 @@ function serveHTML(file, opts = {}) {
     const nonce = req.nonce;
     const csp = [
       "default-src 'self'",
-      `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+      `script-src 'self' 'nonce-${nonce}'`,
       "script-src-attr 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://api.stripe.com",
-      "frame-src 'self' https://js.stripe.com https://checkout.stripe.com"
+      "connect-src 'self'",
+      "frame-src 'self'"
     ].join('; ');
     res.setHeader('Content-Security-Policy', csp);
     if (opts.noCache) res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -174,11 +166,7 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS used_stripe_sessions (
-    session_id TEXT PRIMARY KEY,
-    license_key TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+
 
   CREATE TABLE IF NOT EXISTS promo_codes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -214,9 +202,7 @@ if (adminCheck.count === 0) {
 // Seed default API keys
 const keysCheck = db.prepare('SELECT COUNT(*) as count FROM api_keys').get();
 if (keysCheck.count === 0) {
-  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run('Groq IA', GROQ_API_KEY, 'groq', 'Cl\u00e9 principale pour le chat IA');
-  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run('Stripe Secret', STRIPE_SECRET_KEY, 'stripe', 'Cl\u00e9 secr\u00e8te Stripe');
-  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run('Stripe Public', STRIPE_PUBLIC_KEY, 'stripe', 'Cl\u00e9 publique Stripe');
+  db.prepare('INSERT INTO api_keys (key_name, api_key, service, notes) VALUES (?, ?, ?, ?)').run('Groq IA', GROQ_API_KEY, 'groq', 'Clé principale pour le chat IA');
 }
 
 // ==================== HELPERS ====================
@@ -724,55 +710,7 @@ app.delete('/api/admin/apikeys/:id', adminAuth, (req, res) => {
   res.json({ success: true });
 });
 
-// ==================== STRIPE ROUTES ====================
 
-app.get('/api/stripe/key', (req, res) => {
-  res.json({ publicKey: STRIPE_PUBLIC_KEY });
-});
-
-app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
-  const { plan, promo_code } = req.body;
-  const prices = {
-    monthly: { amount: 1500, name: 'DarkGPT Mensuel' },
-    lifetime: { amount: 5000, name: 'DarkGPT Lifetime' }
-  };
-  const p = prices[plan];
-  if (!p) return res.status(400).json({ error: 'Plan invalide' });
-
-  let finalAmount = p.amount;
-  let promoApplied = null;
-
-  if (promo_code) {
-    const clean = sanitizeInput(promo_code).toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const promo = db.prepare('SELECT * FROM promo_codes WHERE code = ? AND status = ?').get(clean, 'active');
-    if (promo && (!promo.expires_at || new Date(promo.expires_at) >= new Date()) && (!promo.max_uses || promo.used_count < promo.max_uses)) {
-      finalAmount = Math.round(p.amount * (1 - promo.discount_percent / 100));
-      promoApplied = clean;
-      db.prepare('UPDATE promo_codes SET used_count = used_count + 1 WHERE id = ?').run(promo.id);
-    }
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: { name: p.name },
-          unit_amount: finalAmount,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
-      cancel_url: `${SITE_URL}/buy`,
-    });
-    res.json({ id: session.id });
-  } catch (err) {
-    console.error('Stripe Session Error:', err.message);
-    res.status(500).json({ error: `Erreur Stripe: ${err.message}` });
-  }
-});
 
 // ==================== ROUTES ====================
 
@@ -781,7 +719,7 @@ app.get('/buy', serveHTML('buy.html', { noCache: true }));
 app.get('/pricing', serveHTML('pricing.html', { noCache: true }));
 app.get('/login', serveHTML('login.html', { noCache: true }));
 app.get('/chat', serveHTML('chat.html', { noCache: true }));
-app.get('/success', serveHTML('success.html', { noCache: true }));
+
 app.get(ADMIN_PATH, serveHTML('admin.html', { noCache: true }));
 
 // Error handling
