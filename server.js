@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 // ==================== SECURITY CONFIG ====================
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
-const KWIKIAI_API_KEY = process.env.KWIKIAI_API_KEY || '';
+const HF_TOKEN = process.env.HUGGINGFACE_TOKEN || '';
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_51S4Oz6ERFgtddT0AxnvdYSnziThmLKXZXJwYPXJen3AxRj6fM0oF3wykhmY7UBCdh2r4OZF7DioEYSJTaLspbWNO00ikU0AdeU';
 const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY || 'pk_test_51S4Oz6ERFgtddT0AXyQ7UlrqR8pbdapLCl1qApNCD8k8kcqrurzO2ocUcDf6Gv3e1iLbE6tbs9QeX1n4OhUEaXFX00RAlRMJam';
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
@@ -704,35 +704,33 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
       finalPrompt = prompt + ', RAW photo, photorealistic, hyperrealistic, 8k UHD';
     }
 
-    // 2. Generate Image with Kwikiai API
-    const style = prompt.toLowerCase().includes('nude') || prompt.toLowerCase().includes('nue') ? 'nude' : 'realistic';
-    
-    const kwikiResponse = await fetch('https://kwikiai.com/api/v1/generate', {
+    // 2. Generate Image with Hugging Face (UnfilteredAI/NSFW-gen-v2)
+    const hfResponse = await fetch('https://api-inference.huggingface.co/models/UnfilteredAI/NSFW-gen-v2', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${KWIKIAI_API_KEY}`,
+        'Authorization': `Bearer ${HF_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        prompt: finalPrompt,
-        style: style,
-        quality: 'fast' // Fast is usually better for chat response time
+        inputs: finalPrompt,
+        options: { wait_for_model: true }
       })
     });
 
-    const kwikiData = await kwikiResponse.json();
-    
-    if (!kwikiData.url && !kwikiData.image_url) {
-      throw new Error(kwikiData.message || 'Kwikiai failed to return an image URL');
+    if (!hfResponse.ok) {
+      const errorData = await hfResponse.json();
+      throw new Error(errorData.error || 'Hugging Face model failed to respond');
     }
 
-    const imageUrl = kwikiData.url || kwikiData.image_url;
+    const imageBuffer = await hfResponse.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    const imageUrl = `data:image/png;base64,${base64Image}`;
 
     // Log in chat history
     db.prepare('INSERT INTO chat_logs (license_key, message, response) VALUES (?, ?, ?)').run(
       req.user.license_key,
-      `[Génération d'image Kwikiai] ${prompt.substring(0, 500)}`,
-      `[Prompt optimisé: ${finalPrompt}] [Image: ${imageUrl}]`
+      `[Génération d'image HF] ${prompt.substring(0, 500)}`,
+      `[Prompt optimisé: ${finalPrompt}] [Image générée via HF]`
     );
 
     res.json({ success: true, url: imageUrl, refined: finalPrompt });
