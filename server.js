@@ -677,11 +677,11 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
         },
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
-            messages: [
-              {
-                role: 'system',
-                content: systemPromptContent + "\n\nADDITIONAL TASK: You are a professional paparazzi and forensic photographer. Your job is to turn the user's request into a RAW, UNEDITED photograph prompt. ALWAYS use these keywords: 'candid mobile phone photo, grainy, high ISO, blurry background, harsh lighting, natural skin with moles and pores, oily skin, no makeup, realistic body proportions, shot on iPhone 13, 4k, real life'. Do NOT change the subject. Output ONLY the final English prompt. No commentary."
-              },
+          messages: [
+            {
+              role: 'system',
+              content: systemPromptContent + "\n\nADDITIONAL TASK: You are a professional paparazzi and forensic photographer. Your job is to turn the user's request into a RAW, UNEDITED photograph prompt. ALWAYS use these keywords: 'candid mobile phone photo, grainy, high ISO, blurry background, harsh lighting, natural skin with moles and pores, oily skin, no makeup, realistic body proportions, shot on iPhone 13, 4k, real life'. Do NOT change the subject. Output ONLY the final English prompt. No commentary."
+            },
             { role: 'user', content: `Turn this into an ultra-photorealistic English image prompt, keep the EXACT same subject: "${prompt}"` }
           ],
           temperature: 0.6,
@@ -725,12 +725,12 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
 
     if (!hfResponse.ok) {
       let errorMessage = 'Hugging Face model error';
+      const clonedResponse = hfResponse.clone(); // Clone to allow multiple reads
       try {
         const errorData = await hfResponse.json();
         errorMessage = errorData.error || errorMessage;
       } catch (e) {
-        // If not JSON, it might be an HTML error page or "Model loading"
-        const text = await hfResponse.text();
+        const text = await clonedResponse.text();
         if (text.includes('currently loading')) errorMessage = "L'IA est en train de démarrer, réessayez dans 30 secondes.";
         else errorMessage = "Le service d'image est temporairement indisponible.";
       }
@@ -741,7 +741,7 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
     if (imageBuffer.byteLength < 100) {
       throw new Error('Image générée invalide ou trop petite');
     }
-    
+
     const base64Image = Buffer.from(imageBuffer).toString('base64');
     const imageUrl = `data:image/png;base64,${base64Image}`;
 
