@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const ADMIN_PATH = '/ctrl-x9k2m';
 
 const app = express();
+app.set('trust proxy', 1); // Required for rate-limiting behind proxies (Railway, etc.)
 const PORT = process.env.PORT || 3000;
 
 // ==================== SECURITY CONFIG ====================
@@ -69,6 +70,16 @@ const globalLimiter = rateLimit({
   message: { error: 'Trop de requêtes. Réessayez dans une minute.' },
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+// Chat rate limiter - 30 messages per minute
+const chatLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+  message: { error: 'Trop de messages. Attendez une minute.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false } // Disable strict proxy validation
 });
 app.use(globalLimiter);
 
@@ -718,9 +729,17 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
     });
 
     if (!hfResponse.ok) {
-      const errorText = await hfResponse.text();
-      console.error('Hugging Face Error:', errorText);
-      throw new Error(`Hugging Face: ${errorText}`);
+      let errorMessage = 'Hugging Face model error';
+      try {
+        const errorData = await hfResponse.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // If not JSON, it might be an HTML error page or "Model loading"
+        const text = await hfResponse.text();
+        if (text.includes('currently loading')) errorMessage = "L'IA est en train de démarrer, réessayez dans 30 secondes.";
+        else errorMessage = "Le service d'image est temporairement indisponible.";
+      }
+      throw new Error(errorMessage);
     }
 
     const imageBuffer = await hfResponse.arrayBuffer();
