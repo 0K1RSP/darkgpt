@@ -430,6 +430,7 @@
     let currentConvo = null;
     let messages = [];
     let isStreaming = false;
+    let isCooldown = false;
 
     // Verify token validity
     fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ messages: [] }) })
@@ -518,7 +519,7 @@
     async function sendMessage() {
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
-      if (!text || isStreaming) return;
+      if (!text || isStreaming || isCooldown) return;
 
       // Remove welcome screen
       const welcome = document.getElementById('welcome-screen');
@@ -562,7 +563,7 @@
         saveCurrentConvo();
         updateHistorySidebar();
         isStreaming = false;
-        document.getElementById('send-btn').disabled = false;
+        startCooldown();
         container.scrollTop = container.scrollHeight;
         input.focus();
         return;
@@ -643,8 +644,27 @@
       }
 
       isStreaming = false;
-      document.getElementById('send-btn').disabled = false;
+      startCooldown();
       document.getElementById('chat-input').focus();
+    }
+
+    function startCooldown() {
+      isCooldown = true;
+      const btn = document.getElementById('send-btn');
+      btn.disabled = true;
+      let seconds = 30;
+      btn.innerHTML = `<span style="font-size:0.75rem;font-weight:700;">${seconds}s</span>`;
+      const interval = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          isCooldown = false;
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+        } else {
+          btn.innerHTML = `<span style="font-size:0.75rem;font-weight:700;">${seconds}s</span>`;
+        }
+      }, 1000);
     }
 
     function logoutUser() {
