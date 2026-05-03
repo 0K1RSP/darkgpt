@@ -64,6 +64,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Questions IA
         </a>
+        <a href="#" data-tab="prompt" onclick="switchTab('prompt',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-1.42 1.42"/><path d="m7.06 16.94-1.42 1.42"/><path d="m5.64 5.64 1.42 1.42"/><path d="m16.94 16.94 1.42 1.42"/></svg>
+          Configuration IA
+        </a>
       </nav>
       <div class="sidebar-footer">
         <div class="admin-user">
@@ -170,6 +174,23 @@
         </div>
       </div>
 
+      <!-- TAB: Prompt -->
+      <div id="tab-prompt" class="tab-content" style="display:none; height:100%; flex-direction:column;">
+        <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h1>Configuration du Prompt IA (Comportement)</h1>
+          <button class="btn btn-primary" onclick="savePrompt()">💾 Sauvegarder</button>
+        </div>
+        <div class="admin-card" style="flex:1; display:flex; flex-direction:column;">
+          <div class="admin-card-header">
+            <h3>Modifier le fichier prompt.txt en direct</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:5px;">Ce texte définit le comportement et les règles de l'IA.</p>
+          </div>
+          <div class="admin-card-body" style="flex:1; display:flex; flex-direction:column; padding:0;">
+            <textarea id="prompt-textarea" style="width:100%; min-height:400px; height:100%; flex:1; padding:20px; border:none; background:var(--bg-lighter); color:var(--text-primary); font-family:monospace; font-size:0.9rem; resize:vertical; outline:none; border-bottom-left-radius:var(--radius-lg); border-bottom-right-radius:var(--radius-lg);" placeholder="Chargement du prompt..."></textarea>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB: Promo Codes -->
       <div id="tab-promos" class="tab-content" style="display:none;">
         <div class="admin-header">
@@ -251,15 +272,28 @@
 
     // ===== TABS =====
     function switchTab(tab,el){
-      document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
-      document.getElementById('tab-'+tab).style.display='block';
+      document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+      
+      const tabEl = document.getElementById('tab-'+tab);
+      if(tabEl) {
+        if(tab === 'prompt') {
+          tabEl.style.display = 'flex';
+          tabEl.style.flexDirection = 'column';
+          loadPrompt();
+        } else {
+          tabEl.style.display = 'block';
+        }
+      }
+
       document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
-      if(el)el.classList.add('active');
-      if(tab==='licenses')loadLicenses();
-      if(tab==='dashboard')loadStats();
-      if(tab==='logs')loadLogs();
-      if(tab==='chatlogs')loadChatLogs();
-      if(tab==='promos')loadPromos();
+      if(el) el.classList.add('active');
+      else document.querySelector(`[data-tab=${tab}]`).classList.add('active');
+
+      if(tab==='dashboard'){loadStats();loadLicenses();}
+      else if(tab==='licenses')loadLicenses();
+      else if(tab==='logs')loadLogs();
+      else if(tab==='chatlogs')loadChatLogs();
+      else if(tab==='promos')loadPromos();
     }
 
     // ===== STATS =====
@@ -480,7 +514,32 @@
       toast('Code promo supprim\u00e9','success');loadPromos();
     }
 
+    // ===== PROMPT CONFIG =====
+    async function loadPrompt() {
+      try {
+        const r = await fetch(API+'/api/admin/prompt', {headers:{'Authorization':'Bearer '+token}});
+        const d = await r.json();
+        if(d.success) {
+          document.getElementById('prompt-textarea').value = d.content;
+        } else {
+          toast(d.error || 'Erreur chargement prompt', 'error');
+        }
+      } catch(e) { toast('Erreur serveur', 'error'); }
+    }
 
+    async function savePrompt() {
+      const content = document.getElementById('prompt-textarea').value;
+      try {
+        const r = await fetch(API+'/api/admin/prompt', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body:JSON.stringify({content})
+        });
+        const d = await r.json();
+        if(d.success) toast('Prompt sauvegardé avec succès !', 'success');
+        else toast(d.error || 'Erreur sauvegarde', 'error');
+      } catch(e) { toast('Erreur serveur', 'error'); }
+    }
   </script>
 </body>
 </html>

@@ -422,6 +422,26 @@ app.delete('/api/admin/chat-logs', adminAuth, (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/api/admin/prompt', adminAuth, (req, res) => {
+  try {
+    const content = fs.readFileSync(path.join(__dirname, 'prompt.txt'), 'utf-8');
+    res.json({ success: true, content });
+  } catch(e) {
+    res.json({ success: false, error: 'Fichier introuvable' });
+  }
+});
+
+app.post('/api/admin/prompt', adminAuth, (req, res) => {
+  const { content } = req.body;
+  if (typeof content !== 'string') return res.status(400).json({ error: 'Contenu invalide' });
+  try {
+    fs.writeFileSync(path.join(__dirname, 'prompt.txt'), content, 'utf-8');
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Erreur écriture' });
+  }
+});
+
 // ==================== PUBLIC LICENSE ROUTES ====================
 
 app.post('/api/license/verify', authLimiter, (req, res) => {
