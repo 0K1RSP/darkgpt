@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 // ==================== SECURITY CONFIG ====================
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const ATLAS_CLOUD_API_KEY = process.env.ATLAS_CLOUD_API_KEY || '';
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_51S4Oz6ERFgtddT0AxnvdYSnziThmLKXZXJwYPXJen3AxRj6fM0oF3wykhmY7UBCdh2r4OZF7DioEYSJTaLspbWNO00ikU0AdeU';
 const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY || 'pk_test_51S4Oz6ERFgtddT0AXyQ7UlrqR8pbdapLCl1qApNCD8k8kcqrurzO2ocUcDf6Gv3e1iLbE6tbs9QeX1n4OhUEaXFX00RAlRMJam';
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
@@ -703,22 +704,38 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
       finalPrompt = prompt + ', RAW photo, photorealistic, hyperrealistic, 8k UHD';
     }
 
-    // 2. Generate Pollinations URL with the refined prompt + flux model for max realism
-    const seed = Math.floor(Math.random() * 1000000);
-    const encodedPrompt = encodeURIComponent(finalPrompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&nologo=true&width=1024&height=1024&enhance=true&model=flux`;
+    // 2. Generate Image with AtlasCloud AI
+    const atlasResponse = await fetch('https://api.atlascloud.ai/api/v1/model/generateImage', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${ATLAS_CLOUD_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: "flux-schnell", // Using high quality flux model
+        prompt: finalPrompt
+      })
+    });
+
+    const atlasData = await atlasResponse.json();
+    
+    if (!atlasData.url) {
+      throw new Error(atlasData.message || 'AtlasCloud failed to return an image URL');
+    }
+
+    const imageUrl = atlasData.url;
 
     // Log in chat history
     db.prepare('INSERT INTO chat_logs (license_key, message, response) VALUES (?, ?, ?)').run(
       req.user.license_key,
-      `[Génération d'image] ${prompt.substring(0, 500)}`,
+      `[Génération d'image Atlas] ${prompt.substring(0, 500)}`,
       `[Prompt optimisé: ${finalPrompt}] [Image: ${imageUrl}]`
     );
 
     res.json({ success: true, url: imageUrl, refined: finalPrompt });
   } catch (e) {
     console.error('Image generation error:', e);
-    res.status(500).json({ error: 'Erreur lors de la génération de l\'image' });
+    res.status(500).json({ error: 'Erreur lors de la génération de l\'image avec AtlasCloud' });
   }
 });
 
