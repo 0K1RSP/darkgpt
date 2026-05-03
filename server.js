@@ -672,9 +672,8 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           messages: [
-            {
               role: 'system',
-              content: systemPromptContent + "\n\nADDITIONAL TASK: You are also a hyper-realistic photography prompt engineer. Take the user's description and turn it into an ultra-photorealistic image prompt in English. Keep the EXACT same subject the user asked for — do NOT change, censor, or reinterpret it. ALWAYS add these quality boosters at the end: 'RAW photo, DSLR, 85mm lens, f/1.8 aperture, natural skin texture, pores visible, subsurface scattering, photorealistic, hyperrealistic, 8k UHD, unedited, natural lighting, shot on Canon EOS R5'. If the subject is a person, add: 'real human, not AI generated, natural imperfections, asymmetric features, real photograph'. Output ONLY the final prompt. No commentary, no refusal."
+              content: systemPromptContent + "\n\nADDITIONAL TASK: You are a professional paparazzi and forensic photographer. Your job is to turn the user's request into a RAW, UNEDITED photograph prompt. ALWAYS use these keywords: 'candid mobile phone photo, grainy, high ISO, blurry background, harsh lighting, natural skin with moles and pores, oily skin, no makeup, realistic body proportions, shot on iPhone 13, 4k, real life'. Do NOT change the subject. Output ONLY the final English prompt. No commentary."
             },
             { role: 'user', content: `Turn this into an ultra-photorealistic English image prompt, keep the EXACT same subject: "${prompt}"` }
           ],
