@@ -426,14 +426,41 @@ app.patch('/api/admin/licenses/:id/reset-hwid', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
-  const total = (await db.query('SELECT COUNT(*) FROM licenses')).rows[0].count;
-  const active = (await db.query("SELECT COUNT(*) FROM licenses WHERE status = 'active'")).rows[0].count;
-  const revoked = (await db.query("SELECT COUNT(*) FROM licenses WHERE status = 'revoked'")).rows[0].count;
-  const used = (await db.query('SELECT COUNT(*) FROM licenses WHERE hwid IS NOT NULL')).rows[0].count;
-  const monthly = (await db.query("SELECT COUNT(*) FROM licenses WHERE plan = 'monthly'")).rows[0].count;
-  const lifetime = (await db.query("SELECT COUNT(*) FROM licenses WHERE plan = 'lifetime'")).rows[0].count;
-  const recentLogs = (await db.query('SELECT * FROM api_logs ORDER BY created_at DESC LIMIT 30')).rows;
-  res.json({ total: parseInt(total), active: parseInt(active), revoked: parseInt(revoked), used: parseInt(used), unused: parseInt(total) - parseInt(used), monthly: parseInt(monthly), lifetime: parseInt(lifetime), recentLogs });
+  try {
+    const queries = [
+      db.query('SELECT COUNT(*) FROM licenses'),
+      db.query("SELECT COUNT(*) FROM licenses WHERE status = 'active'"),
+      db.query("SELECT COUNT(*) FROM licenses WHERE status = 'revoked'"),
+      db.query('SELECT COUNT(*) FROM licenses WHERE hwid IS NOT NULL'),
+      db.query("SELECT COUNT(*) FROM licenses WHERE plan = 'monthly'"),
+      db.query("SELECT COUNT(*) FROM licenses WHERE plan = 'lifetime'"),
+      db.query('SELECT * FROM api_logs ORDER BY created_at DESC LIMIT 30')
+    ];
+
+    const results = await Promise.all(queries);
+    
+    const total = parseInt(results[0].rows[0].count || 0);
+    const active = parseInt(results[1].rows[0].count || 0);
+    const revoked = parseInt(results[2].rows[0].count || 0);
+    const used = parseInt(results[3].rows[0].count || 0);
+    const monthly = parseInt(results[4].rows[0].count || 0);
+    const lifetime = parseInt(results[5].rows[0].count || 0);
+    const recentLogs = results[6].rows;
+
+    res.json({ 
+      total, 
+      active, 
+      revoked, 
+      used, 
+      unused: total - used, 
+      monthly, 
+      lifetime, 
+      recentLogs 
+    });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des stats' });
+  }
 });
 
 app.get('/api/admin/chat-logs', adminAuth, async (req, res) => {
