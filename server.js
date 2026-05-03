@@ -704,38 +704,22 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
       finalPrompt = prompt + ', RAW photo, photorealistic, hyperrealistic, 8k UHD';
     }
 
-    // 2. Generate Image with AtlasCloud AI
-    const atlasResponse = await fetch('https://api.atlascloud.ai/api/v1/model/generateImage', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${ATLAS_CLOUD_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: "flux-schnell", // Using high quality flux model
-        prompt: finalPrompt
-      })
-    });
-
-    const atlasData = await atlasResponse.json();
-    
-    if (!atlasData.url) {
-      throw new Error(atlasData.message || 'AtlasCloud failed to return an image URL');
-    }
-
-    const imageUrl = atlasData.url;
+    // 2. Generate Pollinations URL with the refined prompt + flux model for max realism
+    const seed = Math.floor(Math.random() * 1000000);
+    const encodedPrompt = encodeURIComponent(finalPrompt);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&nologo=true&width=1024&height=1024&enhance=true&model=flux`;
 
     // Log in chat history
     db.prepare('INSERT INTO chat_logs (license_key, message, response) VALUES (?, ?, ?)').run(
       req.user.license_key,
-      `[Génération d'image Atlas] ${prompt.substring(0, 500)}`,
+      `[Génération d'image] ${prompt.substring(0, 500)}`,
       `[Prompt optimisé: ${finalPrompt}] [Image: ${imageUrl}]`
     );
 
     res.json({ success: true, url: imageUrl, refined: finalPrompt });
   } catch (e) {
     console.error('Image generation error:', e);
-    res.status(500).json({ error: 'Erreur lors de la génération de l\'image avec AtlasCloud' });
+    res.status(500).json({ error: 'Erreur lors de la génération de l\'image' });
   }
 });
 
