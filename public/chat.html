@@ -405,8 +405,8 @@
       </div>
 
       <div class="chat-input-area">
-        <div style="text-align: center; font-size: 0.8rem; color: var(--red-primary); margin-bottom: 8px;">
-          ⚠️ Veuillez patienter ~1 minute entre chaque message. Nous allons rectifier ce bug prochainement.
+        <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+          💡 Tape <strong style="color:var(--red-primary)">/image</strong> suivi d'une description pour générer une image.
         </div>
         <div class="chat-input-wrapper">
           <textarea class="chat-input" id="chat-input" placeholder="Posez votre question à DarkGPT..." rows="1"
@@ -535,6 +535,12 @@
         input.value = '';
         input.style.height = 'auto';
 
+        // Setup conversation if new
+        if (currentConvo === null) {
+          currentConvo = conversations.length;
+          conversations.push({ title: '🖼️ ' + imgPrompt.substring(0, 35) + (imgPrompt.length > 35 ? '...' : ''), messages: [] });
+        }
+
         const typingId = 'typing-' + Date.now();
         container.innerHTML += `<div class="message assistant" id="${typingId}"><div class="message-avatar">🤖</div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
         container.scrollTop = container.scrollHeight;
@@ -560,8 +566,9 @@
           document.getElementById(typingId).querySelector('.message-content').innerHTML = `<span style="color:var(--red-primary)">Erreur de connexion.</span>`;
         }
 
-        saveCurrentConvo();
-        updateHistorySidebar();
+        conversations[currentConvo].messages = [...messages];
+        localStorage.setItem('darkgpt_convos', JSON.stringify(conversations));
+        renderHistory();
         isStreaming = false;
         startCooldown();
         container.scrollTop = container.scrollHeight;
