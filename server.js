@@ -137,6 +137,7 @@ const db = new Database(path.join(__dirname, 'database.db'));
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
+db.pragma('synchronous = FULL'); // More secure for persistence
 db.pragma('foreign_keys = ON');
 
 db.exec(`
@@ -211,6 +212,10 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_promo_code ON promo_codes(code);
   CREATE INDEX IF NOT EXISTS idx_api_keys_status ON api_keys(status);
 `);
+
+// Verify data persistence
+const licenseCount = db.prepare('SELECT COUNT(*) as count FROM licenses').get();
+console.log(`[DB] Database initialized. ${licenseCount.count} licenses found in storage.`);
 
 // Create admin account
 const adminExists = db.prepare('SELECT COUNT(*) as count FROM admins').get();
