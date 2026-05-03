@@ -19,6 +19,7 @@
     "express-rate-limit": "^8.4.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
     "stripe": "^22.1.0",
     "uuid": "^14.0.0"
   }
