@@ -710,8 +710,8 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
       finalPrompt = prompt + ', RAW photo, photorealistic, hyperrealistic, 8k UHD';
     }
 
-    // 2. Generate Image with Hugging Face (UnfilteredAI/NSFW-gen-v2)
-    const hfResponse = await fetch('https://api-inference.huggingface.co/models/UnfilteredAI/NSFW-gen-v2', {
+    // 2. Generate Image with Hugging Face (Protogen v2.2 - High realism, no censorship)
+    const hfResponse = await fetch('https://api-inference.huggingface.co/models/darkstorm2150/Protogen_v2.2_Official_Release', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_TOKEN}`,
