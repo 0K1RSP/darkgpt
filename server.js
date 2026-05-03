@@ -718,11 +718,16 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
     });
 
     if (!hfResponse.ok) {
-      const errorData = await hfResponse.json();
-      throw new Error(errorData.error || 'Hugging Face model failed to respond');
+      const errorText = await hfResponse.text();
+      console.error('Hugging Face Error:', errorText);
+      throw new Error(`Hugging Face: ${errorText}`);
     }
 
     const imageBuffer = await hfResponse.arrayBuffer();
+    if (imageBuffer.byteLength < 100) {
+      throw new Error('Image générée invalide ou trop petite');
+    }
+    
     const base64Image = Buffer.from(imageBuffer).toString('base64');
     const imageUrl = `data:image/png;base64,${base64Image}`;
 
@@ -730,13 +735,13 @@ app.post('/api/image', chatLimiter, userAuth, async (req, res) => {
     db.prepare('INSERT INTO chat_logs (license_key, message, response) VALUES (?, ?, ?)').run(
       req.user.license_key,
       `[Génération d'image HF] ${prompt.substring(0, 500)}`,
-      `[Prompt optimisé: ${finalPrompt}] [Image générée via HF]`
+      `[Prompt optimisé: ${finalPrompt}]`
     );
 
     res.json({ success: true, url: imageUrl, refined: finalPrompt });
   } catch (e) {
-    console.error('Image generation error:', e);
-    res.status(500).json({ error: 'Erreur lors de la génération de l\'image' });
+    console.error('Image generation error details:', e);
+    res.status(500).json({ error: `Erreur génération: ${e.message}` });
   }
 });
 
