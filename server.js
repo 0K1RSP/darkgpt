@@ -73,14 +73,6 @@ const globalLimiter = rateLimit({
 });
 
 // Chat rate limiter - 30 messages per minute
-const chatLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20,
-  message: { error: 'Trop de messages. Attendez une minute.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-  validate: { xForwardedForHeader: false } // Disable strict proxy validation
-});
 app.use(globalLimiter);
 
 // Strict rate limiter for auth endpoints - 5 attempts per 15 min
@@ -97,6 +89,9 @@ const chatLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
   message: { error: 'Limite de messages atteinte. Patientez.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false }
 });
 
 // Stripe rate limiter - 10 checkouts per 10 min
