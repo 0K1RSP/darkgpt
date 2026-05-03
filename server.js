@@ -733,8 +733,8 @@ app.get('/api/stripe/key', (req, res) => {
 app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
   const { plan, promo_code } = req.body;
   const prices = {
-    monthly: { amount: 1990, name: 'DarkGPT Mensuel' },
-    lifetime: { amount: 4990, name: 'DarkGPT Lifetime' }
+    monthly: { amount: 1500, name: 'DarkGPT Mensuel' },
+    lifetime: { amount: 5000, name: 'DarkGPT Lifetime' }
   };
   const p = prices[plan];
   if (!p) return res.status(400).json({ error: 'Plan invalide' });
@@ -765,11 +765,12 @@ app.post('/api/stripe/create-checkout', stripeLimiter, async (req, res) => {
       }],
       mode: 'payment',
       success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
-      cancel_url: `${SITE_URL}/`,
+      cancel_url: `${SITE_URL}/buy`,
     });
     res.json({ id: session.id });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Stripe Session Error:', err.message);
+    res.status(500).json({ error: `Erreur Stripe: ${err.message}` });
   }
 });
 
